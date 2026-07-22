@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Törtei Építőipari Szolgáltató KFT · Nyíregyháza, general
+       construction company ("Építőipari vállalat" per FB). FB tagline: "Nem csak
+       házat, bizalmat is építünk!" — used as the hero tagline and the agent's
+       closing line on the in-house-trades USP.
+       FIRST Hungarian-language demo — quote-agent.js now carries an English-
+       default CONFIG.labels override (see L object there) and a suffix-mode
+       currency (HUF, " Ft" after the number) added for this file; every other
+       client is unaffected since none set CONFIG.labels or currency.position.
+       Angle: broad construction/service company, so the scenario is a ~30 m²
+       house extension (nappali + hálószoba) built onto an existing 1985 house
+       — lets the agent play the alapozástól-a-tetőig in-house-trades USP and
+       close on "always liveable during the build" sequencing, same shape as
+       the English demos' single-loo-working beat.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — terracotta/rust sampled from the logo (bg #ffaa6f, "T" #a54022).
+const THEME = {
+  bg:'#1a120d', dark:'#3d160c', mid:'#6e2c16', brand:'#a54022', bright:'#ffaa6f',
+  dot:'#ffc699', chatBg:'#fdf7f3', tint:'#fbe8dd', tint2:'#fdf1ea', line:'#f3ded1',
+  ink:'#8a3a1c', inkSoft:'#a54022', ring:'rgba(165,64,34,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Törtei Építőipari Szolgáltató KFT',
+    sub: 'Építőipari kivitelezés · Felújítás · Bővítés',
+    tagline: 'Nyíregyháza · Nem csak házat, bizalmat is építünk',
+    initial: 'T',
+    logoSrc: 'tortei-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'házbővítés',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '21:48',
+  ownerBenefit: 'Rögzítve és minősítve 21:48-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a házbővítésedre?" },
+  { r:'user',  t:"Igen, pont ezért írtam" },
+  { r:'agent', t:"Remek! Mit szeretnétek hozzáépíteni?" },
+  { r:'user',  t:"Egy új nappalit és egy hálószobát a meglévő házhoz" },
+  { r:'agent', t:"Az jó nagy lépés. Milyen házhoz épülne ez?" },
+  { r:'user',  t:"Egy 1985-ös családi ház Nagykállóban, oldalt van rá hely" },
+  { r:'agent', t:"Ismerjük ezt a korosztályt. Mi hiányzik most a legjobban otthonról?" },
+  { r:'user',  t:"Két gyerekünk van, kinőttük a helyet, és otthonról is dolgozom, nincs hol" },
+  { r:'agent', t:"Ez sokaknál előjön mostanában. Gondoltatok egy külön dolgozósarokra a nappaliban, vagy inkább külön szoba legyen?" },
+  { r:'user',  t:"Egy csendes sarok bőven elég, nem kell külön szoba" },
+  { r:'agent', t:"Az egyszerűsíti a dolgot, és olcsóbb is. Nagyjából mekkora alapterületet néztek?" },
+  { r:'user',  t:"Olyan 30 négyzetméter körül gondoltuk" },
+  { r:'agent', t:"30 m², rendben. Milyen a telek — sík, vagy van lejtés az oldalon?" },
+  { r:'user',  t:"Sík a terület, eddig csak fű volt ott" },
+  { r:'agent', t:"Az megkönnyíti az alapozást. A tetőt a meglévőhöz illesztenénk, hogy egyben nézzen ki — ez így rendben van?" },
+  { r:'user',  t:"Igen, pont ez a cél, ne látszódjon rajta, hogy hozzáépítettük" },
+  { r:'agent', t:"Akkor a tetőszerkezetet is a meglévő hajlásszögéhez igazítjuk. Gondoltatok padlófűtésre az új részben, vagy maradna a hagyományos radiátor?" },
+  { r:'user',  t:"A padlófűtés jól hangzik, ha nem sokkal drágább" },
+  { r:'agent', t:"A kezdő bekerülés kicsit magasabb, de mivel úgyis felbontjuk a padlót, ez a legjobb pillanat rá. Laknátok a házban az építkezés alatt?" },
+  { r:'user',  t:"Igen, muszáj, nincs hova mennünk közben" },
+  { r:'agent', t:"Akkor szakaszoljuk a munkát, hogy a bejárat és a fürdő mindig használható maradjon — a bontás és a por a bővítés oldalára koncentrálódik." },
+  { r:'user',  t:"Ez megnyugtató, féltem, hogy két hónapig káosz lesz az egész ház" },
+  { r:'agent', t:"Nem lesz az — mindent a saját szakembereinkkel csinálunk, az alapozástól a burkolásig, nem várunk alvállalkozóra egyik lépésnél sem." },
+  { r:'user',  t:"Ez tényleg sokat számít, máshol pont ez volt a probléma" },
+  { r:'agent', t:"Pontosan ezért mondjuk, hogy nem csak házat, bizalmat is építünk. Mi a pontos helyszín irányítószáma?" },
+  { r:'user',  t:"4320" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"19 és 23 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális ehhez a mérethez és kivitelhez. Elkérhetem a neved?" },
+  { r:'user',  t:"Kovács Balázs" },
+  { r:'agent', t:"Köszönöm, Balázs — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0142" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"balazs.kovacs@gmail.com" },
+  { r:'agent', t:"Köszönöm, Balázs — már állítjuk is össze az árajánlatot." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 18_650_000, mid: 20_056_000, upper: 21_900_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Tervdokumentáció + építési engedélyeztetés',       amt:   380_000 },
+    { label:'Földmunka + sávalap kialakítása',                  amt: 1_780_000 },
+    { label:'Falazás — Ytong tégla, teherhordó fal',            amt: 2_340_000 },
+    { label:'Vasbeton koszorú + áthidalók',                     amt:   720_000 },
+    { label:'Tetőszerkezet — ácsmunka, illesztve a meglévőhöz', amt: 2_150_000 },
+    { label:'Tetőfedés cseréppel + bádogozás',                  amt: 1_420_000 },
+    { label:'Homlokzati és tetőtéri hőszigetelés',              amt: 1_680_000 },
+    { label:'Nyílászárók — 3 ablak + teraszajtó',                amt: 1_890_000 },
+    { label:'Elektromos hálózat bővítése',                      amt:   940_000 },
+    { label:'Víz-, fűtés- és padlófűtés-szerelés az új részben', amt: 1_560_000 },
+    { label:'Vakolás és glettelés',                             amt:   860_000 },
+    { label:'Aljzat- és hidegburkolat',                         amt: 1_080_000 },
+    { label:'Festés és dekorálás',                              amt:   410_000 },
+    { label:'Beltéri ajtók',                                    amt:   360_000 },
+    { label:'Villámvédelem és földelés',                        amt:   240_000 },
+    { label:'Állványzat, sitt- és törmelékszállítás',           amt:   590_000 },
+    { label:'Projektmenedzsment (6%)',                          amt: 1_104_000 },
+    { label:'Tartalék (3%)',                                    amt:   552_000 },
+  ],
+  customer: {
+    'Name':'Balázs Kovács',
+    'Phone':'+36 30 555 0142',
+    'Email':'balazs.kovacs@gmail.com',
+  },
+  timingShort: '10–12 hét',
+  jobTags: ['30 m²-es bővítés', 'Nappali + hálószoba', 'Alapozástól a tetőig', 'Meglévő tetőhöz illesztett tetőszerkezet', 'Padlófűtés az új részben', 'Minden szakma egy kézből'],
+  budget: { low: 19_000_000, high: 23_000_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Nagykálló', clientZip: '4320',
+  companyCity: 'Nyíregyháza', distanceMi: 18,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
