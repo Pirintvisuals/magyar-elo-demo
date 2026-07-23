@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Fintor Duguláselhárítás Specialista · Miskolc. Gépi
+       duguláselhárítás falbontás nélkül, vízvezeték-szerelés, fürdőszoba
+       felújítás. Real website (fintor.hu) is packed with authentic detail:
+       30 yrs plumbing / 10 yrs specialising in blockages, 0-24 incl. holidays,
+       20-50 min callout in Miskolc, 99% no-wall-demolition via cable machine,
+       7-day warranty + invoice, recurring-blockage camera inspection
+       (csatornakamerázás), owner is Fintor Zsolt personally in the About text.
+       FB tagline "Fintorog a büdöstől?" used verbatim for the hero tagline.
+       Angle: unlike the construction demos (Törtei/Inverto), this is a small
+       same-day EMERGENCY call-out, not a big itemised build — so the quote is
+       four flat line items in the tens of thousands of Ft, and the customer's
+       guessed budget (20-30k) is intentionally BELOW the real mid (camera
+       inspection add-on pushes it over), exercising the amber "slightly above
+       budget" state instead of the usual green match — the agent's own line
+       ("picit magasabb lesz, de...") justifies it in the transcript itself.
+       Logo `fintor-logo.jpg` — pure black bg, vivid blue water-drop mark
+       (#01a5ec), sampled by pixel.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — vivid blue on black, sampled from the water-drop logo (#01a5ec).
+const THEME = {
+  bg:'#000000', dark:'#052a3a', mid:'#0b5478', brand:'#0f86bc', bright:'#01a5ec',
+  dot:'#5cd0ff', chatBg:'#f2fafd', tint:'#e3f4fb', tint2:'#eefaff', line:'#d7ecf5',
+  ink:'#0b5478', inkSoft:'#0f7fb0', ring:'rgba(15,134,188,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Fintor Duguláselhárítás Specialista',
+    sub: 'Duguláselhárítás · Vízvezeték-szerelés · Fürdőszoba felújítás',
+    tagline: 'Miskolc · Fintorog a büdöstől?',
+    initial: 'F',
+    logoSrc: 'fintor-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'duguláselhárítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '22:36',
+  ownerBenefit: 'Rögzítve és minősítve 22:36-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a duguláselhárításra?" },
+  { r:'user',  t:"Igen, eldugult a lefolyó és kezd nagyon büdös lenni" },
+  { r:'agent', t:"Ismerős érzés, mindjárt ránézünk. Melyik helyiségben van a probléma?" },
+  { r:'user',  t:"A fürdőben, a zuhany és a mosdó is lassan folyik el" },
+  { r:'agent', t:"Ha mindkettő egyszerre lassul, az gyakran nem csak a szifonnál van, hanem lejjebb, a gyűjtővezetékben. Mióta van ez így?" },
+  { r:'user',  t:"Már vagy egy hete rosszabbodik, ma reggel meg teljesen visszaállt a víz" },
+  { r:'agent', t:"Az arra utal, hogy teljesen eldugult, nem csak lassul. Próbáltatok már valamit otthon, lefolyótisztítót, dugóhúzót?" },
+  { r:'user',  t:"Igen, kétféle lefolyótisztítót is öntöttünk bele, semmi" },
+  { r:'agent', t:"Azok sajnos ilyen szintű dugulásnál nem sokat érnek. Mi géppel, spirállal dolgozunk, ami 99%-ban falbontás nélkül megoldja." },
+  { r:'user',  t:"Az jó lenne, nem szeretnénk bontani semmit" },
+  { r:'agent', t:"Nem is szokott kelleni. Ez most az első alkalom, vagy visszatérő probléma ennél a lefolyónál?" },
+  { r:'user',  t:"Már harmadszor van vele gond egy éven belül" },
+  { r:'agent', t:"Akkor érdemes egy csatornakamerázás is, hogy lássuk pontosan mi okozza — lehet gyökérbenövés vagy egy elmozdult csőszakasz, azt egyszeri tisztítással nem lehet végleg megoldani." },
+  { r:'user',  t:"Ezt még sosem csináltattuk, jó ötletnek hangzik" },
+  { r:'agent', t:"Milyen épületben vagytok — társasház, vagy családi ház?" },
+  { r:'user',  t:"Társasház, a harmadikon" },
+  { r:'agent', t:"Az fontos, mert társasházban a probléma forrása néha nem is nálatok van, hanem lejjebb a közös vezetékben — a kamera ezt is megmutatja." },
+  { r:'user',  t:"Ez megnyugtató, legalább tudjuk, kit kell értesíteni, ha nem nálunk van a baj" },
+  { r:'agent', t:"Mikor tudnátok fogadni minket?" },
+  { r:'user',  t:"Minél hamarabb, este már nem tudjuk használni a fürdőt" },
+  { r:'agent', t:"Miskolcon belül 20-50 percen belül kint tudunk lenni, úgyhogy ma még sort tudunk keríteni rá." },
+  { r:'user',  t:"Az szuper, akkor kérnénk még ma" },
+  { r:'agent', t:"Mi a pontos cím?" },
+  { r:'user',  t:"Vologda utca, Miskolc" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál erre?" },
+  { r:'user',  t:"Nem tudom pontosan, talán 20-30 ezer forint körül gondoltam" },
+  { r:'agent', t:"A kamerázással együtt ez picit magasabb lesz, de hosszabb távon ez éri meg, mert nem kell fél év múlva megint kihívnotok minket ugyanarra." },
+  { r:'user',  t:"Ha végre megoldódik tartósan, megéri" },
+  { r:'agent', t:"Elkérhetem a neved?" },
+  { r:'user',  t:"Fekete Anikó" },
+  { r:'agent', t:"Köszönöm, Anikó — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0163" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"aniko.fekete@gmail.com" },
+  { r:'agent', t:"Köszönöm, Anikó — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 38_000, mid: 41_000, upper: 45_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Kiszállási díj',                                amt:  8_000 },
+    { label:'Gépi (spirálos) duguláselhárítás — fürdőszoba', amt: 15_000 },
+    { label:'Csatornakamerázás — helyszíni diagnosztika',    amt: 12_000 },
+    { label:'Utókezelés és tisztítás',                       amt:  6_000 },
+  ],
+  customer: {
+    'Name':'Anikó Fekete',
+    'Phone':'+36 20 555 0163',
+    'Email':'aniko.fekete@gmail.com',
+  },
+  timingShort: 'Még ma, 20–50 percen belül',
+  jobTags: ['Fürdőszobai lefolyó dugulás', 'Gépi (spirálos) tisztítás', 'Csatornakamerázás', 'Visszatérő probléma — 3. alkalom', 'Társasház, 3. emelet', 'Falbontás nélkül'],
+  budget: { low: 20_000, high: 30_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Miskolc', clientZip: '3525',
+  companyCity: 'Miskolc', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
