@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Aqua System Service Kft. · Érd. Épületgépészet — víz-,
+       gáz- és fűtésszerelés (FB category "VÍZ GÁZ VAGY FŰTÉS SZERELŐ"). FB
+       tagline "Gépészet Garanciával" used for the hero tagline.
+       Angle: differentiate from Fintor (emergency drain call-out, Miskolc) by
+       going with a planned, higher-ticket job — old open-flue gas boiler
+       replaced with a modern condensing (kondenzációs) unit, sized to the
+       house, plus the turbo-chimney requirement when there's no real chimney,
+       smart thermostat, and the gas/pressure test that's a legal requirement
+       at commissioning. This is the classic "cutting the gas bill" homeowner
+       driver in Hungary right now, distinct from the panel-wall (Inverto),
+       wall-injection (Szakszig) and drain (Fintor) angles already in the
+       gallery.
+       Logo `aqua-logo.jpg` — white bg, grey wordmark + blue wave, sampled by
+       pixel (grey #6d6d6d, blue #43a4e8).
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — grey-blue sampled from the wordmark/wave logo (blue #43a4e8).
+const THEME = {
+  bg:'#12181d', dark:'#1c2b35', mid:'#2c5a78', brand:'#3f8fc4', bright:'#7fc4ea',
+  dot:'#a8dbf5', chatBg:'#f4f9fc', tint:'#e5f2fa', tint2:'#eff8fc', line:'#dbe9f2',
+  ink:'#2c5a78', inkSoft:'#3f8fc4', ring:'rgba(63,143,196,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Aqua System Service Kft.',
+    sub: 'Víz-, gáz- és fűtésszerelés · Épületgépészet',
+    tagline: 'Érd · Gépészet garanciával',
+    initial: 'A',
+    logoSrc: 'aqua-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'fűtéskorszerűsítés',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '21:07',
+  ownerBenefit: 'Rögzítve és minősítve 21:07-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a fűtéskorszerűsítésre?" },
+  { r:'user',  t:"Igen, cserélni szeretnénk a régi gázkazánt" },
+  { r:'agent', t:"Milyen kazán van most, és nagyjából hány éves?" },
+  { r:'user',  t:"Egy régi, nyílt égésterű kazán, olyan 20 éves lehet" },
+  { r:'agent', t:"Az már biztosan nem a leghatékonyabb, és a nyílt égésterű kazánokat ma már sok helyen biztonsági okokból is ki kell váltani. Kondenzációs kazánra gondoltatok?" },
+  { r:'user',  t:"Igen, hallottuk, hogy azzal sokat lehet spórolni a gázon" },
+  { r:'agent', t:"Akár 20-30%-ot is a fogyasztáson, a régi kazánhoz képest. Hány négyzetméteres a ház, amit fűt?" },
+  { r:'user',  t:"Körülbelül 110 négyzetméter" },
+  { r:'agent', t:"Ahhoz elég lesz egy 24 kW-os kondenzációs kazán is. A radiátorok megvannak, vagy azokat is cserélnétek?" },
+  { r:'user',  t:"A régi lemezradiátorok maradnának, csak a kazánt cserélnénk" },
+  { r:'agent', t:"Az is teljesen jó megoldás, egy modern kazán a régi radiátorokkal is jól tud együttműködni, csak be kell szabályozni a rendszert utána. Van hagyományos kémény, vagy zárt égésterű, úgynevezett turbó kéményre lenne szükség?" },
+  { r:'user',  t:"Nincs igazi kémény, szóval gondolom azt is kell építeni" },
+  { r:'agent', t:"Igen, ehhez egy oldalfali turbó kéményrendszert szerelünk, az nem igényel hagyományos kéményt, csak egy átvezetést a falon. Gondolkodtatok okostermosztátról is a kazánhoz?" },
+  { r:'user',  t:"Az jó ötlet, azzal talán jobban tudnánk szabályozni a fűtést" },
+  { r:'agent', t:"Egy applikációról vezérelhető termosztáttal otthonról is be tudod állítani, ha máskor kell fűteni. Ez most lenne az első ilyen gáz- és nyomáspróba nálatok, vagy már csináltatok korábban?" },
+  { r:'user',  t:"Most lenne az első alkalom" },
+  { r:'agent', t:"Rendben, akkor az üzembe helyezéshez szükséges gáz- és nyomáspróbát is elvégezzük, ez kötelező eleme az átadásnak. Minden munkánkra írásos garanciát vállalunk." },
+  { r:'user',  t:"Ez megnyugtató, egy ekkora beruházásnál fontos, hogy legyen mögötte garancia" },
+  { r:'agent', t:"Pontosan ezért szerepel ez minden ajánlatunkban. Mi a pontos cím?" },
+  { r:'user',  t:"Érd, Bem József utca környéke" },
+  { r:'agent', t:"Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Még a fűtési szezon előtt, szóval szeptemberre jó lenne" },
+  { r:'agent', t:"Az belefér, egy ilyen csere általában 1-2 nap alatt megvan. Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"900 ezer és 1,3 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális egy 24 kW-os kondenzációs kazánra a kéményrendszerrel és a beszabályozással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Kiss Dávid" },
+  { r:'agent', t:"Köszönöm, Dávid — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0174" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"david.kiss@gmail.com" },
+  { r:'agent', t:"Köszönöm, Dávid — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 980_000, mid: 1_050_000, upper: 1_150_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + műszaki tervezés',        amt:  30_000 },
+    { label:'Régi kazán bontása és elszállítása',            amt:  25_000 },
+    { label:'24 kW-os kondenzációs gázkazán — anyag',        amt: 480_000 },
+    { label:'Oldalfali turbó kéményrendszer kiépítése',      amt: 120_000 },
+    { label:'Rendszer átkötése, csővezeték szerelés',        amt:  95_000 },
+    { label:'Radiátorok beszabályozása',                     amt:  45_000 },
+    { label:'Okostermosztát — beszerelés és beüzemelés',     amt:  65_000 },
+    { label:'Gáz- és nyomáspróba, üzembe helyezés',          amt:  40_000 },
+    { label:'Szerelési munkadíj',                            amt: 130_000 },
+    { label:'Garancia jegyzőkönyv + hatósági bejelentés',    amt:  20_000 },
+  ],
+  customer: {
+    'Name':'Dávid Kiss',
+    'Phone':'+36 30 555 0174',
+    'Email':'david.kiss@gmail.com',
+  },
+  timingShort: '1–2 munkanap',
+  jobTags: ['24 kW kondenzációs gázkazán csere', 'Oldalfali turbó kéményrendszer', 'Régi radiátorok megtartva, beszabályozva', 'Okostermosztát', 'Gáz- és nyomáspróba', 'Írásos garancia'],
+  budget: { low: 900_000, high: 1_300_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Érd', clientZip: '2030',
+  companyCity: 'Érd', distanceMi: 4,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
