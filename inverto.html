@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Inverto Kft. (FB page shows "Raab", real company name Inverto
+       Kft.) · Győr, teljeskörű lakás/családi ház felújítás + saját beruházásban
+       tégla- és panellakás-felújítás/értékesítés. FB tagline: "Keressen minket
+       bizalommal!" — used as the hero tagline.
+       Angle: they explicitly specialise in BOTH brick and panel apartment work
+       (rare to call out panel expertise specifically), so the scenario is a
+       58 m² PANEL lakás full reno in Marcalváros — lets the agent play the
+       load-bearing-wall-in-a-panel-building expertise (can't just knock through
+       to open-plan the kitchen like in a brick house, needs a statikus) as the
+       "we actually know this building type" beat, then the old wet-block
+       plumbing + aluminium wiring as the why-now driver, closing on the
+       in-house-trades line same shape as the other HU demo.
+       Logo `inverto-logo.jpg` — sage-green + gold, sampled by pixel (bg #42514e,
+       gold ring/text #baa472).
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — sage green + gold sampled from the logo (bg #42514e, gold #baa472).
+const THEME = {
+  bg:'#141a17', dark:'#1f2a24', mid:'#42514e', brand:'#5a6f64', bright:'#baa472',
+  dot:'#d9c08f', chatBg:'#f8f6f1', tint:'#eef0e9', tint2:'#f5f2e8', line:'#e3ddd0',
+  ink:'#3d4a3f', inkSoft:'#4f6357', ring:'rgba(90,111,100,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Inverto Kft.',
+    sub: 'Teljeskörű lakásfelújítás · Győr és környéke',
+    tagline: 'Győr · Keressen minket bizalommal!',
+    initial: 'I',
+    logoSrc: 'inverto-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'lakásfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '20:14',
+  ownerBenefit: 'Rögzítve és minősítve 20:14-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a lakásfelújításodra?" },
+  { r:'user',  t:"Igen, egy panellakást szeretnénk felújítani" },
+  { r:'agent', t:"Az jó, sokat tudunk kezdeni egy panellal. Melyik városrészben van?" },
+  { r:'user',  t:"Marcalvárosban, a Kandó Kálmán utcában" },
+  { r:'agent', t:"Ismerjük azt a lakótelepet. Hány négyzetméteres a lakás, és hány szobás?" },
+  { r:'user',  t:"58 négyzetméter, két plusz félszobás" },
+  { r:'agent', t:"Rendben. Mi a fő elképzelés — csak felújítás, vagy át is alakítanátok valamit?" },
+  { r:'user',  t:"Szeretnénk nyitottá tenni a konyhát a nappalival" },
+  { r:'agent', t:"Ezt sokan szeretnék panelban, de van egy fontos dolog: a konyha és a nappali közti fal a legtöbb panelháznál teherhordó keresztfal, azt nem lehet csak úgy kivenni." },
+  { r:'user',  t:"Ó, ezt nem tudtam, azt hittük simán kiváltjuk mint egy téglaháznál" },
+  { r:'agent', t:"Statikai szakvéleménnyel megnézzük, tudunk-e vágni benne egy megerősített nyílást acél gerendával — sok esetben megoldható, csak nem szabad házilag nekiállni, mert az egész épület állékonyságát érinti." },
+  { r:'user',  t:"Ez megnyugtató, legalább tudjuk mire számítsunk" },
+  { r:'agent', t:"Pontosan ezért kérünk mindig statikust, mielőtt bármit bontanánk. Milyen állapotban van most a fürdő?" },
+  { r:'user',  t:"Az eredeti, 1985-ös állapotban, és időnként beázik a szomszéd alatta" },
+  { r:'agent', t:"Az a vizes blokk gerincvezetéke lesz, ami ennyi idő után szinte mindenhol cserére szorul. Azt javasoljuk, hogy a felújításnál a teljes vizes szakaszt cseréljük, ne csak a látható részt." },
+  { r:'user',  t:"Igen, mindenképp szeretnénk végre rendesen megcsináltatni" },
+  { r:'agent', t:"Az elektromos hálózat is abból az évjáratból van gondolom — alumínium vezeték?" },
+  { r:'user',  t:"Azt hiszem igen, sosem cserélték" },
+  { r:'agent', t:"Azt is teljesen kicserélnénk rézre, az alumínium ennyi év után már nem biztonságos. Milyen padlóburkolatot képzeltek el?" },
+  { r:'user',  t:"Nappaliba és hálókba laminált parkettát, a fürdőbe és konyhába csempét" },
+  { r:'agent', t:"Jó választás egy panelhoz. Gondoltatok szigetelésre is, vagy csak belső felújítás lenne?" },
+  { r:'user',  t:"Csak belső, a homlokzat már szigetelve van a társasház által" },
+  { r:'agent', t:"Az megkönnyíti a dolgunkat. Ki laknátok addig, vagy albérletben lennétek a munka alatt?" },
+  { r:'user',  t:"Ki, a szüleimnél leszünk pár hónapig" },
+  { r:'agent', t:"Az jó, mert egy ilyen mélységű felújításnál — bontás, gépészet, vakolás — nem igazán lehet bent lakni közben." },
+  { r:'user',  t:"Gondoltuk mi is, ezért nem siettük el eddig" },
+  { r:'agent', t:"Mindent a saját szakembereinkkel csinálunk, a statikustól a burkolásig, úgyhogy nem kell külön embereket összefogdosnod hozzá." },
+  { r:'user',  t:"Ez tetszik, eddig mindig ez volt a nehezebb rész" },
+  { r:'agent', t:"Mi a lakás pontos irányítószáma?" },
+  { r:'user',  t:"9024" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"8 és 10 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális egy ekkora, ilyen mélységű felújításhoz. Elkérhetem a neved?" },
+  { r:'user',  t:"Petra Nagy" },
+  { r:'agent', t:"Köszönöm, Petra — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0187" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"petra.nagy@gmail.com" },
+  { r:'agent', t:"Köszönöm, Petra — már állítjuk is össze az árajánlatot." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 8_700_000, mid: 9_548_000, upper: 10_500_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Statikai szakvélemény + tervezés',                 amt:   180_000 },
+    { label:'Bontás + törmelékszállítás',                        amt:   420_000 },
+    { label:'Konyha-nappali nyílás kialakítása acél gerendával', amt:   680_000 },
+    { label:'Teljes vizes blokk gépészet cseréje',               amt: 1_450_000 },
+    { label:'Elektromos hálózat teljes cseréje — alumíniumról rézre', amt: 980_000 },
+    { label:'Fürdőszoba — új szaniterek, csaptelepek',           amt:   850_000 },
+    { label:'Fürdő és konyha csempézés',                         amt:   780_000 },
+    { label:'Vakolás és glettelés',                              amt:   620_000 },
+    { label:'Laminált parketta — nappali és hálók',              amt:   540_000 },
+    { label:'Beltéri ajtók cseréje',                             amt:   380_000 },
+    { label:'Festés és dekorálás',                               amt:   310_000 },
+    { label:'Konyhabútor + munkalap',                            amt:   890_000 },
+    { label:'Villamos szerelvények, kapcsolók, világítás',       amt:   340_000 },
+    { label:'Törmelékszállítás, állványzat, sitt',               amt:   260_000 },
+    { label:'Projektmenedzsment (6%)',                           amt:   520_800 },
+    { label:'Tartalék (4%)',                                     amt:   347_200 },
+  ],
+  customer: {
+    'Name':'Petra Nagy',
+    'Phone':'+36 30 555 0187',
+    'Email':'petra.nagy@gmail.com',
+  },
+  timingShort: '8–10 hét',
+  jobTags: ['58 m²-es panellakás', 'Konyha-nappali nyitás acél gerendával', 'Teljes gépészet és elektromos csere', 'Statikai szakvélemény', 'Fürdő és konyha felújítás', 'Minden szakma egy kézből'],
+  budget: { low: 8_000_000, high: 10_000_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Győr', clientZip: '9024',
+  companyCity: 'Győr', distanceMi: 4,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
