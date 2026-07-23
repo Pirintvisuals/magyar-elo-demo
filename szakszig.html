@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Szakszig Kivitelező és Szolgáltató Kft. · Nyíregyháza.
+       Founded 1987, waterproofing specialist (real website szakszig.hu, tagline
+       "Szakszig...Minden ami vízszigetelés!"): flat-roof thermal/water
+       insulation, foundation/basement/pool waterproofing, RETROFIT wall
+       damp-proofing by chemical injection, coating systems. Founding member of
+       the Hungarian insulators/roofers/tinsmiths association.
+       Angle: unlike the other three demos (extension, panel-apartment reno,
+       drain call-out), this company's rarest, most technical specialty is
+       injektálásos utólagos falszigetelés (retrofit rising-damp wall injection)
+       — a classic old-Hungarian-house problem (salétromos, nedves fal) that
+       most general contractors don't actually do, so the scenario leans into
+       explaining HOW the injection technology works (no digging/demolition,
+       chemical damp-proof course drilled into the wall) as the "we actually
+       know this" beat, plus a written-warranty/invoice trust beat.
+       Logo `szakszig-logo.png` — plain black geometric mark on white, no
+       colour to sample, so the accent was chosen thematically (blue = water)
+       rather than pixel-sampled.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — near-black (from the logo's black mark) + steel/water blue accent
+//    (thematic choice — vízszigetelés = waterproofing — since the logo itself
+//    is monochrome black-on-white with no colour to sample).
+const THEME = {
+  bg:'#0d0f10', dark:'#111827', mid:'#1e3a5f', brand:'#2563a8', bright:'#4fb0e0',
+  dot:'#7cc9ea', chatBg:'#f5f8fa', tint:'#e6f1f7', tint2:'#eef6fa', line:'#dbe7ee',
+  ink:'#1e3a5f', inkSoft:'#2563a8', ring:'rgba(37,99,168,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Szakszig Kivitelező és Szolgáltató Kft.',
+    sub: 'Vízszigetelés · Lapostető és falszigetelés · 1987 óta',
+    tagline: 'Nyíregyháza · Minden ami vízszigetelés!',
+    initial: 'S',
+    logoSrc: 'szakszig-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'falszigetelés',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '19:52',
+  ownerBenefit: 'Rögzítve és minősítve 19:52-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a falszigetelésre?" },
+  { r:'user',  t:"Igen, salétromos, nedves a ház alsó fala" },
+  { r:'agent', t:"Ismerős probléma, sok régi háznál előjön. Milyen korú az épület?" },
+  { r:'user',  t:"1960-as évekbeli családi ház" },
+  { r:'agent', t:"Azoknál a legtöbbször azért van ez, mert eredetileg nem volt vízszigetelés a falban, és a talajnedvesség kapilláris úton felszívódik. Melyik oldalon, és nagyjából mennyi fal érintett?" },
+  { r:'user',  t:"Főleg az északi oldalon, olyan 15 méter hosszan" },
+  { r:'agent', t:"Milyen magasan látszik a nedvesség — csak alul, vagy feljebb is felkúszott már?" },
+  { r:'user',  t:"Kábé fél méter magasan, néhol lehullik a vakolat is" },
+  { r:'agent', t:"Az tipikus kép. Kívülről szigetelni itt nem elég, mert a fal belsejéből szívja tovább a vizet — mi injektálással oldjuk meg, egy vízlepergető anyagot juttatunk be a fal keresztmetszetébe, ami leállítja a kapilláris felszívódást." },
+  { r:'user',  t:"Ezt még nem hallottam, hogy működik pontosan?" },
+  { r:'agent', t:"Lyukakat fúrunk a falba egy megadott raszterben, és abba nyomjuk be a szigetelőanyagot — ez kémiai úton hoz létre egy vízzáró réteget a fal belsejében, nem kell hozzá bontani vagy kiásni semmit kívülről." },
+  { r:'user',  t:"Az jó, mert az ásás elég drasztikusnak tűnt" },
+  { r:'agent', t:"Pontosan ezért szokás ezt választani, ha a fal már áll, és nem lehet kívülről hozzáférni. A vakolatot viszont az érintett részen le kell verni, és utána újra kell vakolni, mert a régi vakolat már tele van sóval." },
+  { r:'user',  t:"Ez rendben van, úgyis fel akartuk újítani azt a részt" },
+  { r:'agent', t:"Van pince is az épület alatt, vagy csak a földszinti fal érintett?" },
+  { r:'user',  t:"Nincs pince, csak a földszinti rész" },
+  { r:'agent', t:"Az egyszerűsíti a dolgot. Egy ilyen munkára írásos garanciát is adunk, úgyhogy nem kell attól tartani, hogy pár év múlva visszatér a probléma." },
+  { r:'user',  t:"Ez megnyugtató, egy másik cég annó csak ígérgetett, aztán semmi papír nem volt mögötte" },
+  { r:'agent', t:"Nálunk minden munkáról számlát és garanciát is kaptok, ez alapkövetelmény ebben a szakmában. Mennyi ideje áll fent ez a probléma?" },
+  { r:'user',  t:"Már évek óta, de mostanra rosszabbodott" },
+  { r:'agent', t:"Minél tovább van kezeletlenül, annál mélyebbre húzza a sót a vakolatba, úgyhogy jól tettétek, hogy most foglalkoztok vele. Mi a pontos cím?" },
+  { r:'user',  t:"Nyíregyháza, Sóstói út környéke" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"800 ezer és 1,2 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális ekkora szakaszra, a vakolat helyreállításával együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Tóth Gábor" },
+  { r:'agent', t:"Köszönöm, Gábor — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0129" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"gabor.toth@gmail.com" },
+  { r:'agent', t:"Köszönöm, Gábor — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 850_000, mid: 900_000, upper: 980_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + szakvélemény',                amt:  40_000 },
+    { label:'Régi vakolat leverése az érintett szakaszon (15 fm)', amt:  90_000 },
+    { label:'Fal előkészítése, fúrási pontok kijelölése',        amt:  35_000 },
+    { label:'Injektálás — vízlepergető anyag befúrása (15 fm)', amt: 420_000 },
+    { label:'Utólagos vízszigetelő (szanáló) vakolat felhordása', amt: 180_000 },
+    { label:'Glettelés és simítás',                              amt:  70_000 },
+    { label:'Törmelékszállítás és takarítás',                    amt:  45_000 },
+    { label:'Garancia jegyzőkönyv + záró ellenőrzés',            amt:  20_000 },
+  ],
+  customer: {
+    'Name':'Gábor Tóth',
+    'Phone':'+36 20 555 0129',
+    'Email':'gabor.toth@gmail.com',
+  },
+  timingShort: '4–5 munkanap',
+  jobTags: ['15 fm falszigetelés injektálással', 'Salétromos, nedves fal', '1960-as évekbeli családi ház', 'Szanáló vakolat', 'Írásos garancia', 'Bontás nélküli technológia'],
+  budget: { low: 800_000, high: 1_200_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Nyíregyháza', clientZip: '4400',
+  companyCity: 'Nyíregyháza', distanceMi: 5,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
