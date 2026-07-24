@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Gáz-Lak Mester Kft · Kaposvár. FB About lists exactly
+       two specialties: víz-, gáz-, központi fűtés szerelés AND gépi
+       földmunka (mechanical earthworks) — an unusual, genuinely
+       complementary combo (most plumbing/heating firms don't also run
+       excavation equipment).
+       Angle: the ONE scenario that needs both specialties at once — full
+       utility connection (víz/gáz/csatorna bekötés) for a new-build house,
+       trenching from the plot boundary to the house. No other demo in the
+       gallery covers new-connection/site-utility work (Aqua System did a
+       boiler swap, Fintor a drain call-out, Szakszig wall injection) — this
+       is the first "before the house even exists yet" scenario.
+       Logo: `gazlak-logo.jpg` is NOT a graphic mark — it's an actual job-site
+       photo of their excavator levelling a plot (yellow JCB-style loader,
+       muddy ground, mobile homes in the background). User explicitly chose
+       to use this real work photo as-is in the logo slot rather than source a
+       proper logo graphic. object-fit:contain keeps it letterboxed/undistorted
+       in the square slot. THEME accent (#ebb402) is the excavator's own
+       yellow, sampled by pixel — thematically fitting given "gépi földmunka"
+       is literally the excavator's job.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — construction-yellow sampled from the excavator in the job photo.
+const THEME = {
+  bg:'#0f0d0a', dark:'#2b2214', mid:'#5c4a1f', brand:'#a8790a', bright:'#ebb402',
+  dot:'#f5d466', chatBg:'#faf6ea', tint:'#f3e9c8', tint2:'#f8f1dc', line:'#ecdfb8',
+  ink:'#5c4a1f', inkSoft:'#a8790a', ring:'rgba(168,121,10,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Gáz-Lak Mester Kft',
+    sub: 'Víz-, gáz-, központi fűtés szerelés · Gépi földmunka',
+    tagline: 'Kaposvár · Közműtől a fűtésig, egy kézből',
+    initial: 'G',
+    logoSrc: 'gazlak-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'közműbekötés',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '18:44',
+  ownerBenefit: 'Rögzítve és minősítve 18:44-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a közműbekötésre?" },
+  { r:'user',  t:"Igen, most épül a házunk, és kellene a víz, gáz és csatorna bekötése" },
+  { r:'agent', t:"Gratulálok az építkezéshez! Van már kiépítve közmű a telek határáig, vagy a teljes bekötést nulláról kell megoldani?" },
+  { r:'user',  t:"A telek előtt megvannak a fő vezetékek, de a telken belül semmi nincs kiásva" },
+  { r:'agent', t:"Rendben, akkor a teljes árkolást és a bekötéseket is mi végezzük. Milyen messze van a ház a telekhatártól?" },
+  { r:'user',  t:"Kábé 18 méterre" },
+  { r:'agent', t:"Az három külön nyomvonal — víz, gáz, csatorna — 18 méter hosszan, ezt géppel ássuk ki, nem kézi erővel, úgyhogy gyorsan megy. Milyen mély a csatorna, tudod esetleg, vagy ezt is felmérjük?" },
+  { r:'user',  t:"Nem tudom pontosan, gondolom majd megnézitek" },
+  { r:'agent', t:"Igen, ezt helyszíni felméréssel állapítjuk meg, a lejtésnek pontosnak kell lennie, hogy rendesen folyjon. A gázbekötéshez van már gáztervező által jóváhagyott terv?" },
+  { r:'user',  t:"Van tervünk, azt a szolgáltatóval már egyeztettük" },
+  { r:'agent', t:"Az jó, akkor a kivitelezés gyorsabban mehet, mert nem kell megvárni az engedélyeztetést. A vízbekötésnél mérőaknát is építeni kell, vagy az már megvan?" },
+  { r:'user',  t:"Azt még nem, azt is meg kellene csináltatni" },
+  { r:'agent', t:"Rendben, azt betonelemes vagy műanyag vízmérőaknával oldjuk meg, attól függően, mi kerül közelebb az útburkolathoz. A csatornánál van rendszeresen magas talajvíz a telken, vagy száraz a terület?" },
+  { r:'user',  t:"Eddig nem volt gond vele, elég száraz a talaj" },
+  { r:'agent', t:"Az megkönnyíti a munkát, nem kell külön vízteleníteni az árkot. Mikorra kellene elkészülnie, hogy tudjatok tovább haladni az építkezéssel?" },
+  { r:'user',  t:"Két héten belül jó lenne, utána jönne az alapozás" },
+  { r:'agent', t:"Az belefér, egy ekkora közműbekötés nálunk kb 4-5 munkanap. Mi a telek pontos címe?" },
+  { r:'user',  t:"Kaposvár, Toponár környéke" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok a teljes bekötésre?" },
+  { r:'user',  t:"1,2 és 1,6 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális a három bekötésre a földmunkával együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Horváth Zsolt" },
+  { r:'agent', t:"Köszönöm, Zsolt — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0193" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"zsolt.horvath@gmail.com" },
+  { r:'agent', t:"Köszönöm, Zsolt — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 1_450_000, mid: 1_540_000, upper: 1_650_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + kiviteli egyeztetés',              amt:   40_000 },
+    { label:'Gépi árokásás — víz, gáz, csatorna nyomvonal (18 fm×3)', amt:  380_000 },
+    { label:'Vízbekötés — vezeték + vízmérőakna kiépítése',          amt:  320_000 },
+    { label:'Gázbekötés — vezeték + nyomáspróba',                     amt:  290_000 },
+    { label:'Csatornabekötés — vezeték, lejtés kialakítása',          amt:  260_000 },
+    { label:'Visszatöltés, tömörítés, terep rendezése',               amt:  120_000 },
+    { label:'Engedélyezési dokumentáció + üzembe helyezés',           amt:   60_000 },
+    { label:'Törmelék- és földfelesleg elszállítása',                 amt:   70_000 },
+  ],
+  customer: {
+    'Name':'Zsolt Horváth',
+    'Phone':'+36 30 555 0193',
+    'Email':'zsolt.horvath@gmail.com',
+  },
+  timingShort: '4–5 munkanap',
+  jobTags: ['Teljes közműbekötés — víz, gáz, csatorna', '18 fm gépi árokásás', 'Vízmérőakna kiépítése', 'Gázbekötés jóváhagyott tervvel', 'Csatorna lejtés kialakítása', 'Új építésű családi ház'],
+  budget: { low: 1_200_000, high: 1_600_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Kaposvár', clientZip: '7400',
+  companyCity: 'Kaposvár', distanceMi: 6,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
