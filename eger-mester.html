@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Eger Mester · Eger és térsége (Ostoros, Felsőtárkány,
+       Demjén, Andornaktálya, Füzesabony, Egerbakta, Mezőkövesd, Noszvaj,
+       Egerszalók). FB category "Szobafestés", 100% ajánlott (5 vélemény).
+       Services: festés, hidegburkolás, melegburkolás, gipszkartonozás,
+       lakberendezési tanácsadás — i.e. pure FINISHING trades, no structural/
+       plumbing/electrical work, which sets this apart from every other demo
+       in the gallery so far (Törtei/Inverto/Szakszig/Aqua are all
+       structural/M&E). Recent FB post shows them doing the wall/floor prep
+       for a kitchen fit-out alongside another renovation firm (BB
+       Otthonfelújítás) — confirms they're a finishing subcontractor as much
+       as a standalone painter.
+       Angle: nappali + előszoba refresh — repaint, swap old carpet for
+       laminate, and a gipszkarton feature wall with LED strip lighting behind
+       the TV (a very current Hungarian interior trend) — lets the agent use
+       their actual "lakberendezési tanácsadás" service as a value-add (colour
+       consulting) rather than just quoting materials, and closes on a
+       furniture-protection/logistics beat instead of the trade-sequencing
+       beats used in the other demos.
+       Logo `eger-mester-logo.jpg` — black bg, warm brown house+moon mark,
+       sampled by pixel (brown ~#916446, no other logo in the gallery uses
+       this warm brown/gold family).
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — warm brown + gold on black, sampled from the house/moon logo.
+const THEME = {
+  bg:'#000000', dark:'#241a12', mid:'#5c422c', brand:'#8a6242', bright:'#e0b976',
+  dot:'#f0d9a8', chatBg:'#fbf7f0', tint:'#f3e8d8', tint2:'#f8f1e5', line:'#ecdfc9',
+  ink:'#5c422c', inkSoft:'#8a6242', ring:'rgba(138,98,66,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Eger Mester',
+    sub: 'Festés · Burkolás · Gipszkartonozás · Lakberendezés',
+    tagline: 'Eger és térsége · 100%-ban ajánlott',
+    initial: 'E',
+    logoSrc: 'eger-mester-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'lakásfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '20:33',
+  ownerBenefit: 'Rögzítve és minősítve 20:33-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a lakásfelújításra?" },
+  { r:'user',  t:"Igen, a nappalit és az előszobát szeretnénk felújítani" },
+  { r:'agent', t:"Milyen jellegű munkára gondoltatok — csak festés, vagy burkolatcsere is bele lenne?" },
+  { r:'user',  t:"Mindkettő, és egy dizájnfalat is szeretnénk a tévé mögé" },
+  { r:'agent', t:"Jó ötlet, egy gipszkarton díszfal indirekt világítással nagyon fel tudja dobni a nappalit. Milyen színvilágban gondolkodtatok a festésnél?" },
+  { r:'user',  t:"Valami meleg, semleges tónusra gondoltunk, de nem tudjuk pontosan melyikre" },
+  { r:'agent', t:"Ebben tudunk segíteni, a lakberendezési tanácsadás is benne van nálunk — ki tudunk hozni pár mintát a helyszínen, mielőtt nekiállnánk. Mekkora a két helyiség együtt, nagyjából?" },
+  { r:'user',  t:"A nappali kb 24, az előszoba 8 négyzetméter" },
+  { r:'agent', t:"Rendben, 32 m² összesen. A padlón most mi van, és mire cserélnétek?" },
+  { r:'user',  t:"Régi szőnyegpadló van, azt szeretnénk kiváltani laminált parkettára" },
+  { r:'agent', t:"Jó választás, könnyű karbantartani és melegebb hatású, mint egy hidegburkolat. A falak most milyen állapotban vannak — sima, festhető felület, vagy előtte glettelni is kell?" },
+  { r:'user',  t:"Elég egyenetlenek, szerintem glettelni is kell" },
+  { r:'agent', t:"Az belefér, egyébként is jobb eredményt ad, ha a festés előtt rendesen elő van készítve a fal. A gipszkarton díszfalba terveznétek polcot vagy fiókot is, vagy csak sima, világításos felület legyen?" },
+  { r:'user',  t:"Csak sima felület legyen, a világítás a lényeg" },
+  { r:'agent', t:"Rendben, egy egyszerű, süllyesztett LED-szalagos kivitel nagyon jól fog mutatni. A bútorokat ti mozgatjátok el, vagy azt is megoldjuk?" },
+  { r:'user',  t:"Örülnénk, ha ti megoldanátok, nincs hova tenni mindent" },
+  { r:'agent', t:"Nem gond, a nagyobb bútorokat betakarjuk és arrébb toljuk a helyiségen belül, csak a kisebb, törékeny dolgokat kérjük, hogy előtte pakoljatok el. Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Két hónapon belül jó lenne, karácsonyra készen szeretnénk lenni" },
+  { r:'agent', t:"Az belefér, egy ekkora munka nálunk kb 2 hét alatt megvalósul. Mi a pontos cím?" },
+  { r:'user',  t:"Felsőtárkányban lakunk" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok erre a két helyiségre?" },
+  { r:'user',  t:"450 és 600 ezer forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre és kivitelre, a díszfallal együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Varga Eszter" },
+  { r:'agent', t:"Köszönöm, Eszter — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0148" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"eszter.varga@gmail.com" },
+  { r:'agent', t:"Köszönöm, Eszter — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 445_000, mid: 480_000, upper: 520_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Lakberendezési tanácsadás + színterv',            amt:  15_000 },
+    { label:'Fal előkészítés — glettelés (32 m²)',              amt:  55_000 },
+    { label:'Festés — két réteg (32 m²)',                       amt:  60_000 },
+    { label:'Régi szőnyegpadló bontása',                        amt:  20_000 },
+    { label:'Laminált parketta lerakása (32 m²)',               amt: 140_000 },
+    { label:'Gipszkarton díszfal kialakítása LED-világítással', amt: 130_000 },
+    { label:'Szegélylécek és zárszelvények',                    amt:  25_000 },
+    { label:'Bútorvédelem, takarás, mozgatás',                  amt:  20_000 },
+    { label:'Törmelék- és hulladékelszállítás',                 amt:  15_000 },
+  ],
+  customer: {
+    'Name':'Eszter Varga',
+    'Phone':'+36 20 555 0148',
+    'Email':'eszter.varga@gmail.com',
+  },
+  timingShort: '2 hét',
+  jobTags: ['Nappali + előszoba felújítás (32 m²)', 'Gipszkarton díszfal LED-világítással', 'Laminált parketta csere', 'Fal glettelés + festés', 'Lakberendezési tanácsadás', 'Bútorvédelem és mozgatás'],
+  budget: { low: 450_000, high: 600_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Felsőtárkány', clientZip: '3324',
+  companyCity: 'Eger', distanceMi: 7,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
