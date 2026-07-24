@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Lakásfelújítók (FB page title "Teljeskörű lakásfelújítás").
+       Multi-city operation — Kecskemét, Cegléd, Budapest, Szolnok — core
+       activities szobafestés + gipszkartonozás per their own About text, logo
+       tagline "Szakértők a lakásfelújításban".
+       Angle: differentiate from Eger Mester (also paint+drywall core) with a
+       KITCHEN prep scenario (customer ordering cabinets elsewhere, this
+       company does the room — tiling, ceiling, electrics — before the
+       cabinets arrive) and by using a genuine inter-city distance (Kecskemét
+       HQ → Cegléd client, ~54 km) since this is the first demo spanning
+       several cities rather than one town + close suburbs.
+       Logo `lakasfelujitok-logo.jpg` — near-black bg (#001010) with a
+       four-colour tool-icon house mark (mint/gold/lime/teal), sampled by
+       pixel; teal (#0fd2c3) picked as the primary accent.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — teal sampled from the four-colour tool-icon logo (bg #001010).
+const THEME = {
+  bg:'#001010', dark:'#03282a', mid:'#0a4d4f', brand:'#0fa89e', bright:'#3ee0d0',
+  dot:'#7ff0e2', chatBg:'#f2fbfa', tint:'#dff5f2', tint2:'#ebfaf8', line:'#d3ece8',
+  ink:'#0a4d4f', inkSoft:'#0fa89e', ring:'rgba(15,168,158,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Lakásfelújítók',
+    sub: 'Szobafestés · Gipszkartonozás · Teljeskörű lakásfelújítás',
+    tagline: 'Kecskemét és térsége · Szakértők a lakásfelújításban',
+    initial: 'L',
+    logoSrc: 'lakasfelujitok-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'konyhafelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '19:26',
+  ownerBenefit: 'Rögzítve és minősítve 19:26-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a konyhafelújításra?" },
+  { r:'user',  t:"Igen, teljesen fel szeretnénk újítani a konyhánkat" },
+  { r:'agent', t:"Nagyszerű. A meglévő konyhabútor marad, vagy azt is cserélitek?" },
+  { r:'user',  t:"Új konyhabútort rendelünk máshonnan, nekünk csak a helyiséget kellene rendbe tenni előtte" },
+  { r:'agent', t:"Az gyakori kérés nálunk, sok konyhabútor-gyártóval dolgozunk együtt így. Mekkora a konyha alapterülete?" },
+  { r:'user',  t:"Körülbelül 14 négyzetméter" },
+  { r:'agent', t:"Rendben. A falakon most csempe van, vagy festett felület?" },
+  { r:'user',  t:"Régi, sárguló csempe van a munkapult fölött és lent, a padlón is" },
+  { r:'agent', t:"Azt levernénk, és újraburkolnánk. Gondoltatok már típusra — nagyméretű csempe, vagy inkább mozaik a munkapult fölé?" },
+  { r:'user',  t:"A munkapult fölé valami modernebb, keskeny téglás mintát szeretnénk" },
+  { r:'agent', t:"Az jól mutat, és könnyen tisztán tartható. A padlóra mi lenne — csempe marad, vagy valami mást szeretnétek?" },
+  { r:'user',  t:"Csempét szeretnénk ott is, valami sötétebb árnyalatút" },
+  { r:'agent', t:"Rendben. A mennyezet és a falak többi része festés lesz, vagy ott is szükséges gipszkartonozás valahol?" },
+  { r:'user',  t:"A mennyezet egyenetlen, ott szerintem kell egy gipszkarton álmennyezet is, süllyesztett világítással" },
+  { r:'agent', t:"Az praktikus megoldás, egyszerre eltünteti az egyenetlenséget, és helyet ad a spotlámpáknak. Az elektromos hálózatot is bővítenétek a konyhabútorhoz — új konnektorok, világítás?" },
+  { r:'user',  t:"Igen, több konnektor is kellene a pult fölé, és a szekrények alá is szeretnénk világítást" },
+  { r:'agent', t:"Azt is meg tudjuk oldani, egy villanyszerelő kollégával dolgozunk együtt ilyenkor. Mikor érkezik az új konyhabútor, hogy tudjuk ütemezni a munkát?" },
+  { r:'user',  t:"Körülbelül két hónap múlva lesz kész és szállítható" },
+  { r:'agent', t:"Az bőven elég idő, a mi részünk általában 1-2 hét alatt elkészül, jóval a bútor előtt. Melyik városban van a lakás?" },
+  { r:'user',  t:"Cegléden" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok a helyiség rendbetételére, bútor nélkül?" },
+  { r:'user',  t:"700 ezer és 950 ezer forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, a gipszkarton álmennyezettel és a dupla burkolással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Nagy Renáta" },
+  { r:'agent', t:"Köszönöm, Renáta — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0159" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"renata.nagy@gmail.com" },
+  { r:'agent', t:"Köszönöm, Renáta — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 730_000, mid: 770_000, upper: 830_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + ütemezés a bútorgyártóval',        amt:  20_000 },
+    { label:'Régi csempe bontása (fal + padló)',                      amt:  60_000 },
+    { label:'Falburkolás — munkapult fölötti csempe (kb 8 m²)',      amt: 140_000 },
+    { label:'Padlóburkolás — csempe (14 m²)',                        amt: 175_000 },
+    { label:'Gipszkarton álmennyezet süllyesztett világítással',      amt: 210_000 },
+    { label:'Elektromos bővítés — konnektorok + szekrény alatti világítás', amt: 95_000 },
+    { label:'Festés — fennmaradó falfelület',                        amt:  45_000 },
+    { label:'Törmelékszállítás és takarítás',                        amt:  25_000 },
+  ],
+  customer: {
+    'Name':'Renáta Nagy',
+    'Phone':'+36 30 555 0159',
+    'Email':'renata.nagy@gmail.com',
+  },
+  timingShort: '1–2 hét',
+  jobTags: ['14 m²-es konyha előkészítése', 'Fal- és padlóburkolás csempével', 'Gipszkarton álmennyezet süllyesztett világítással', 'Elektromos bővítés — pult fölötti és szekrény alatti világítás', 'Konyhabútor-gyártóhoz igazított ütemezés'],
+  budget: { low: 700_000, high: 950_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Cegléd', clientZip: '2700',
+  companyCity: 'Kecskemét', distanceMi: 54,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
