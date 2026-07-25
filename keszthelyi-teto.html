@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Keszthelyi Tető Kft · Tatabánya (Szent Borbála).
+       FB category "Tetőfedő szolgáltatás", services listed exactly:
+       Tetőszerkezetek készítése, Tetőfedés, Bádogozás. First pure ROOFING
+       demo in the gallery (every other client is renovation/M&E/finishing —
+       this is the closest analogue to the original UK "Apex Roofing"
+       template, localized).
+       Angle: old asbestos-cement (eternit) roof on a family house, full
+       replacement to cserép (tile), with the roof-truss/timber condition as
+       an unknown to be confirmed once the eternit comes off (classic
+       Hungarian old-house scenario — eternit often contains asbestos and
+       needs careful, proper removal) — plus new guttering/flashing since all
+       three of their stated services (structure/covering/flashing) are used
+       in one job.
+       Logo `keszthelyi-teto-logo.jpg` — charcoal bg with an architectural
+       blueprint sketch behind a bronze roof-truss + house icon, sampled by
+       pixel (bronze #b78644). Kept bg/dark/mid more neutral grey-charcoal
+       (rather than warm brown) so the palette doesn't read too close to
+       Eger Mester's or Gáz-Lak Mester's warm brown/gold themes.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — neutral charcoal-grey + bronze accent, sampled from the roof-truss logo.
+const THEME = {
+  bg:'#0e0d0c', dark:'#221f1d', mid:'#4a4441', brand:'#8a6234', bright:'#c99a5c',
+  dot:'#e0b980', chatBg:'#faf6f0', tint:'#f1e6d4', tint2:'#f7f0e2', line:'#ebdcc3',
+  ink:'#4a3826', inkSoft:'#8a6234', ring:'rgba(138,98,52,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Keszthelyi Tető Kft',
+    sub: 'Tetőszerkezet · Tetőfedés · Bádogozás',
+    tagline: 'Tatabánya és környéke · Tetőszerkezettől a bádogozásig',
+    initial: 'K',
+    logoSrc: 'keszthelyi-teto-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'tetőcsere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '20:19',
+  ownerBenefit: 'Rögzítve és minősítve 20:19-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a tetőcserére?" },
+  { r:'user',  t:"Igen, a családi házunk tetejét kellene lecserélni" },
+  { r:'agent', t:"Milyen a jelenlegi tetőfedés — cserép, eternit, vagy más?" },
+  { r:'user',  t:"Régi eternit hullámlemez van rajta, még a szüleimtől maradt" },
+  { r:'agent', t:"Azt mindenképp érdemes cserélni, az eternit idővel porladni kezd, és a régebbi típusokban azbeszt is lehet, aminek a bontását szakszerűen kell végezni. Nagyjából mekkora a tetőfelület?" },
+  { r:'user',  t:"Kábé 140 négyzetméter" },
+  { r:'agent', t:"Rendben, 140 m². Milyen tetőfedésre gondoltatok helyette — cserép, vagy inkább fémlemez?" },
+  { r:'user',  t:"Cserépre gondoltunk, jobban tetszik a látványa" },
+  { r:'agent', t:"Jó választás, tartósabb is hosszú távon. A tetőszerkezetet — a faanyagot — megnézte már valaki, vagy csak a fedést cserélnétek?" },
+  { r:'user',  t:"Azt nem, de lehet, hogy azzal is baj van, néhol beázott" },
+  { r:'agent', t:"Ahol beázott, ott a tetőléceket és esetleg a szarufákat is át kell nézni, mert a nedves fa korhad. Ezt az eternit bontása után tudjuk pontosan megmondani, de mindig belekalkuláljuk egy tartalékkeretbe, hátha kell pótlás." },
+  { r:'user',  t:"Ez logikus, jobb ha előre számolunk vele" },
+  { r:'agent', t:"A bádogozást — ereszcsatorna, csatornalefolyó, kéményszegély — egyben megcsináljuk, vagy az megvan már?" },
+  { r:'user',  t:"Az ereszcsatorna is nagyon rossz állapotban van, azt is kérnénk" },
+  { r:'agent', t:"Rendben, azt is beleszámoljuk. Van tetőtér-beépítés, vagy csak hideg tetőtér van most?" },
+  { r:'user',  t:"Csak hideg tetőtér, nem lakott" },
+  { r:'agent', t:"Az egyszerűsíti a dolgot, nem kell belülről is dolgozni. Hőszigetelést terveztek a jövőben a tetőtérbe, vagy egyelőre csak a fedés a cél?" },
+  { r:'user',  t:"Egyelőre csak a fedés, a szigetelés majd később jöhet" },
+  { r:'agent', t:"Rendben, azt később is meg lehet oldani külön. Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Az ősz beállta előtt jó lenne, szóval szeptemberre" },
+  { r:'agent', t:"Az belefér, egy 140 m²-es tetőnél kb 2 hét a kivitelezés. Mi a pontos cím?" },
+  { r:'user',  t:"Tatán lakunk" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"3,2 és 3,8 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, az eternit bontásával és az új bádogozással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Molnár Tamás" },
+  { r:'agent', t:"Köszönöm, Tamás — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0175" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"tamas.molnar@gmail.com" },
+  { r:'agent', t:"Köszönöm, Tamás — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 3_350_000, mid: 3_600_000, upper: 3_850_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + statikai ellenőrzés',                    amt:    60_000 },
+    { label:'Régi eternit hullámlemez bontása + veszélyeshulladék-elszállítás', amt:  380_000 },
+    { label:'Tetőléc és szarufa pótlás (beázott szakasz, tartalék)',        amt:   220_000 },
+    { label:'Párazáró/párádiffúziós fóliázás',                             amt:   180_000 },
+    { label:'Cseréplécezés',                                               amt:   160_000 },
+    { label:'Cserépfedés (140 m²) — anyag',                                amt:   980_000 },
+    { label:'Cserépfedés — munkadíj',                                      amt:   720_000 },
+    { label:'Ereszcsatorna + lefolyók cseréje',                            amt:   420_000 },
+    { label:'Kéményszegély + egyéb bádogozás',                             amt:   260_000 },
+    { label:'Állványzat + törmelékszállítás',                              amt:   220_000 },
+  ],
+  customer: {
+    'Name':'Tamás Molnár',
+    'Phone':'+36 20 555 0175',
+    'Email':'tamas.molnar@gmail.com',
+  },
+  timingShort: '2 hét',
+  jobTags: ['140 m²-es tetőcsere', 'Eternit bontása és elszállítása', 'Cseréptetőre váltás', 'Tetőléc és szarufa pótlás', 'Új ereszcsatorna és bádogozás', 'Hideg tetőtér'],
+  budget: { low: 3_200_000, high: 3_800_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Tata', clientZip: '2890',
+  companyCity: 'Tatabánya', distanceMi: 12,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
