@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Tetőfedés Szaki · Zalaegerszeg (city per user, no FB
+       profile/address was given for this prospect — only phone, email, and
+       their own site tetofedes-szaki.hu, which returns 403 Forbidden).
+       Angle: a LAPOSTETŐ (flat roof) job — old bitumen membrane on a garage
+       leaking, replaced with EPDM rubber membrane — deliberately different
+       from Keszthelyi Tető's pitched-tile full replacement so the two
+       roofing demos in the gallery don't feel like the same job reskinned.
+       Bitumen-vs-EPDM tradeoff (cheap+15-20yr vs pricier+40-50yr, single-sheet
+       no seams) is the "we actually know this" beat.
+       Logo `tetofedes-szaki-logo.jpg` — red/white wordmark over a photo of
+       roofers tiling a roof, red sampled by pixel (#c20008) — first
+       red-based THEME in the gallery, distinct from every prior palette.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — red sampled from the "TETŐFEDÉS" wordmark (#c20008).
+const THEME = {
+  bg:'#100809', dark:'#2b0d0f', mid:'#5c1418', brand:'#a01d22', bright:'#e23138',
+  dot:'#f0666b', chatBg:'#fdf5f5', tint:'#fbe4e4', tint2:'#fdefef', line:'#f5dbdb',
+  ink:'#7a1418', inkSoft:'#a01d22', ring:'rgba(160,29,34,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Tetőfedés Szaki',
+    sub: 'Tetőjavítás · Tetőfedés · Lapostető szigetelés',
+    tagline: 'Zalaegerszeg és környéke · Bármiben tudunk segíteni',
+    initial: 'T',
+    logoSrc: 'tetofedes-szaki-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'tetőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '17:38',
+  ownerBenefit: 'Rögzítve és minősítve 17:38-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a tetőjavításra?" },
+  { r:'user',  t:"Igen, a garázsunk lapos teteje ázik be" },
+  { r:'agent', t:"Ismerős probléma, a lapostetők idővel szinte mindig felmondják a szolgálatot. Mennyi ideje szivárog, és honnan indult, tudod-e?" },
+  { r:'user',  t:"Már egy éve gyanús volt, de most tényleg csöpög befelé esőben" },
+  { r:'agent', t:"Az arra utal, hogy a szigetelőréteg már átszakadt valahol, nem csak megkopott. Milyen a jelenlegi fedés — bitumenes lemez, vagy valami más?" },
+  { r:'user',  t:"Azt hiszem bitumenes, elég régi már, foltos, pöttyös a felszíne" },
+  { r:'agent', t:"Az a klasszikus öreg bitumenlemez, azoknál 15-20 év után szinte biztos, hogy cserére szorul, nem elég a foltozás. Mekkora a garázs teteje nagyjából?" },
+  { r:'user',  t:"Körülbelül 24 négyzetméter" },
+  { r:'agent', t:"Rendben. Két megoldás van általában — újra bitumenes lemez, vagy egy modernebb, tartósabb EPDM gumimembrán. Melyik érdekelne?" },
+  { r:'user',  t:"Mi a különbség köztük?" },
+  { r:'agent', t:"A bitument olcsóbb lerakni, de 15-20 évente újra kell. Az EPDM egyetlen darabból megy le, nincs hegesztett varrat, és akár 40-50 évig is kitart, csak drágább a kezdő beruházás. Hosszú távon inkább az EPDM éri meg." },
+  { r:'user',  t:"Akkor inkább azt választanánk, ha hosszú távon megéri" },
+  { r:'agent', t:"Jó döntés. Van a tetőn valamilyen áttörés — szellőző, kémény, napelemtartó — amit körbe kell szigetelni?" },
+  { r:'user',  t:"Van egy szellőzőcső rajta, más nincs" },
+  { r:'agent', t:"Azt is körbeszigeteljük EPDM-mel, az a leggyakoribb gyenge pont különben. A régi bitument le kell szedni, vagy rá lehet fektetni az újat?" },
+  { r:'user',  t:"Azt nem tudom, ti jobban látjátok" },
+  { r:'agent', t:"Alaposabb megoldás, ha leszedjük, és megnézzük a lejtésbeton állapotát is alatta — ha az is károsodott, azt is javítani kell, különben csak visszatér a probléma. Mikorra kellene elkészülnie?" },
+  { r:'user',  t:"Minél előbb, mielőtt beázik a garázsban tárolt cucc" },
+  { r:'agent', t:"Ez sürgős eset, egy-két héten belül be tudjuk ütemezni. Mi a pontos cím?" },
+  { r:'user',  t:"Zalaegerszegen lakunk" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"450 és 600 ezer forint között gondoltuk" },
+  { r:'agent', t:"Ez reális egy EPDM-es megoldásra, a régi bitumen leszedésével együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Németh Gábor" },
+  { r:'agent', t:"Köszönöm, Gábor — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0162" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"gabor.nemeth@gmail.com" },
+  { r:'agent', t:"Köszönöm, Gábor — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 480_000, mid: 510_000, upper: 550_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + lejtésbeton ellenőrzés',    amt: 20_000 },
+    { label:'Régi bitumenlemez bontása és elszállítása (24 m²)', amt: 55_000 },
+    { label:'Lejtésbeton javítása (szükség szerint)',          amt: 60_000 },
+    { label:'EPDM gumimembrán — anyag (24 m²)',                amt: 190_000 },
+    { label:'EPDM fektetés — munkadíj',                        amt: 110_000 },
+    { label:'Szellőzőcső körbeszigetelése',                    amt: 25_000 },
+    { label:'Peremlezárás, csepegtetőprofil',                  amt: 35_000 },
+    { label:'Törmelékszállítás és takarítás',                  amt: 15_000 },
+  ],
+  customer: {
+    'Name':'Gábor Németh',
+    'Phone':'+36 20 555 0162',
+    'Email':'gabor.nemeth@gmail.com',
+  },
+  timingShort: '1–2 hét',
+  jobTags: ['24 m²-es lapostető felújítás', 'Régi bitumenlemez cseréje EPDM-re', 'Lejtésbeton ellenőrzés', 'Szellőzőcső körbeszigetelése', 'Garázs tető', 'Sürgős — beázás'],
+  budget: { low: 450_000, high: 600_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Zalaegerszeg', clientZip: '8900',
+  companyCity: 'Zalaegerszeg', distanceMi: 5,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
