@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · V&V Gekisz Kft. · Eger. Real website (villany-viz-eger.hu)
+       is unusually detailed: villanyszerelés + vízszerelés + fűtésszerelés +
+       villanybojler szerelés, HIVATALOS HAJDU & ARISTON SZERVIZ, 247 Google
+       reviews at 4.9★, real slogan "Amit mások nem tudnak, mi megoldjuk."
+       Angle: electric water heater (villanybojler) replacement is the ONE job
+       that genuinely needs both trades they actually combine (electrical +
+       plumbing) and lets the agent cite the HAJDU/ARISTON authorised-service
+       credential — a real, checkable differentiator, not a generic claim.
+       No other demo in the gallery covers a bojler job.
+       Logo `vv-gekisz-logo.jpg` — circular badge, near-black/teal bg with a
+       teal "V&V" lightbulb mark, sampled by pixel (teal #17bcda); the coral
+       (#e86a5a) also visible in the mark was kept as the pulse-dot accent so
+       the palette doesn't read identically to Lakásfelújítók's teal scheme.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — teal sampled from the V&V lightbulb mark, coral dot for contrast.
+const THEME = {
+  bg:'#050e0e', dark:'#0a2e30', mid:'#0f5a5f', brand:'#17969e', bright:'#17bcda',
+  dot:'#e86a5a', chatBg:'#f2fafb', tint:'#dff3f6', tint2:'#ecf9fa', line:'#d5ebee',
+  ink:'#0f5a5f', inkSoft:'#17969e', ring:'rgba(23,150,158,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'V&V Gekisz Kft.',
+    sub: 'Villany- és vízszerelés · 4,9★ Google-értékelés (247 vélemény)',
+    tagline: 'Eger · Amit mások nem tudnak, mi megoldjuk',
+    initial: 'V',
+    logoSrc: 'vv-gekisz-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'villanybojler csere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '22:03',
+  ownerBenefit: 'Rögzítve és minősítve 22:03-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a villanybojler cseréjére?" },
+  { r:'user',  t:"Igen, tönkrement a régi bojlerünk, folyamatosan csöpög és nem melegít rendesen" },
+  { r:'agent', t:"Az általában a fűtőszál vagy a hőfokszabályozó hibája, de ha csöpög is, lehet, hogy a tartály már korrodált. Hány literes bojler van most, és nagyjából hány éves?" },
+  { r:'user',  t:"80 literes, olyan 12 éves lehet" },
+  { r:'agent', t:"Annyi idő után egy csere jobban megéri, mint a javítás. HAJDU és ARISTON hivatalos szervizként ezekkel a márkákkal dolgozunk a legtöbbet, náluk a garancia is könnyebben intézhető. Hányan használjátok otthon, hogy tudjuk, mekkora bojler kellene?" },
+  { r:'user',  t:"Négyen vagyunk, szoktunk fürdeni is, nem csak zuhanyozni" },
+  { r:'agent', t:"Akkor egy 100-120 literes ajánlott, hogy ne fogyjon ki a meleg víz. Zárt vagy nyitott rendszerű bojler van most?" },
+  { r:'user',  t:"Azt nem tudom pontosan" },
+  { r:'agent', t:"Semmi gond, ezt a helyszínen megnézzük, ez határozza meg, milyen biztonsági szelep kell hozzá. Az elektromos bekötés is cserére szorul, vagy csak a bojlert kell lecserélni?" },
+  { r:'user',  t:"A csatlakozó is elég régi, gondolom azt is érdemes lenne" },
+  { r:'agent', t:"Igen, egy ilyen korú bojlernél gyakran a régi vezeték sem felel meg a mai biztonsági előírásoknak — mi egyszerre nézzük át és cseréljük ki, ha kell, hiszen villanyszerelő és vízszerelő is vagyunk egyben, nem kell két külön szakembert hívni." },
+  { r:'user',  t:"Ez tényleg praktikus, eddig mindig külön kellett intézni ilyesmit" },
+  { r:'agent', t:"Pontosan ezért van értelme egyben megcsináltatni. Hol van felszerelve a bojler — fürdőszobában, vagy máshol?" },
+  { r:'user',  t:"A fürdőszobában, a mosdó fölött" },
+  { r:'agent', t:"Rendben, az a szokásos elhelyezés. Mikorra lenne szükségetek rá?" },
+  { r:'user',  t:"Minél hamarabb, most hideg vízzel zuhanyozunk" },
+  { r:'agent', t:"Ez sürgős eset, pár napon belül be tudjuk ütemezni. Mi a pontos cím?" },
+  { r:'user',  t:"Eger, Csebokszári út környéke" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"120 és 160 ezer forint között gondoltuk" },
+  { r:'agent', t:"Ez reális egy 100-120 literes bojlerre a bekötéssel együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Kiss Andrea" },
+  { r:'agent', t:"Köszönöm, Andrea — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0186" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"andrea.kiss@gmail.com" },
+  { r:'agent', t:"Köszönöm, Andrea — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 135_000, mid: 145_000, upper: 158_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + régi bojler leszerelése',   amt: 15_000 },
+    { label:'100-120 literes HAJDU/ARISTON villanybojler — anyag', amt: 75_000 },
+    { label:'Biztonsági szelep + csatlakozó szerelvények',    amt: 18_000 },
+    { label:'Elektromos csatlakozás cseréje',                 amt: 20_000 },
+    { label:'Beüzemelés + próba',                             amt: 10_000 },
+    { label:'Régi bojler elszállítása',                       amt:  7_000 },
+  ],
+  customer: {
+    'Name':'Andrea Kiss',
+    'Phone':'+36 30 555 0186',
+    'Email':'andrea.kiss@gmail.com',
+  },
+  timingShort: 'Pár napon belül',
+  jobTags: ['100-120 literes villanybojler csere', 'HAJDU/ARISTON hivatalos szerviz', 'Elektromos csatlakozás csere', 'Biztonsági szelep csere', 'Sürgős — hideg vízzel zuhanyoznak', 'Villany + víz egy kézből'],
+  budget: { low: 120_000, high: 160_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Eger', clientZip: '3300',
+  companyCity: 'Eger', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
