@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Kozák tetőfedő mester (registered as Kozák Hausmeister
+       Bt. per their site footer) · Budapest, operating nationwide. Real site
+       (tetofelujitasbp.hu) is unusually detailed: 2-generation family
+       business, ács+tetőfedő+bádogos mester, 30 years, contact Mihály Gábor.
+       Angle: this is the THIRD roofing demo in the gallery, so it needed a
+       genuinely different job shape from Keszthelyi Tető (pitched eternit→
+       tile, full teardown) and Tetőfedés Szaki (flat garage roof, bitumen→
+       EPDM). Their site explicitly sells "palatető felújítása
+       cserepeslemezzel" — old slate-effect asbestos-cement sheet roofing
+       overlaid with lightweight metal tile-effect sheet, EXPLICITLY WITHOUT
+       removing the old roof ("tetőfedés bontás nélkül") — a real, distinct
+       technique (overlay vs teardown) that's the whole point of the
+       conversation here.
+       No logo file was provided for this prospect and no FB handle was given
+       either (just phone/email/site), so this demo uses the engine's built-in
+       letter-badge fallback (CONFIG.brand.initial, no logoSrc/fbHandle) —
+       don't invent or hotlink a logo image without one being supplied.
+       THEME (navy + gold) is a thematic "heritage/family craftsmanship"
+       choice, not sampled, since there's no logo to sample from.
+       Client is in Gödöllő (~28 km from Budapest) rather than same-city, to
+       reflect their actually-nationwide/regional reach rather than a single
+       town's local radius like most other demos.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — navy + gold, a thematic "heritage family craftsmanship" choice
+//    (no logo file was supplied for this client, so nothing to sample).
+const THEME = {
+  bg:'#0a0e14', dark:'#141c2b', mid:'#243349', brand:'#3a5175', bright:'#c9a227',
+  dot:'#e0c161', chatBg:'#f7f6f1', tint:'#eee8d5', tint2:'#f4f0e3', line:'#e5ddc4',
+  ink:'#243349', inkSoft:'#3a5175', ring:'rgba(58,81,117,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Kozák tetőfedő mester',
+    sub: 'Ács, tetőfedő és bádogos mester · 2 generáció, 30 év tapasztalat',
+    tagline: 'Budapest és országosan · Tetőtől-talpig minőség',
+    initial: 'K',
+    logoSrc: '',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'tetőfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '19:11',
+  ownerBenefit: 'Rögzítve és minősítve 19:11-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a tetőfelújításra?" },
+  { r:'user',  t:"Igen, a szüleim házának palatetejét kellene felújítani" },
+  { r:'agent', t:"Az klasszikus régi tetőfedés, sok helyen még mindig azbeszttartalmú lehet. Milyen állapotban van most — csak kopott, vagy már törött, hiányos részek is vannak?" },
+  { r:'user',  t:"Több helyen is berepedt, és mohás az egész felület" },
+  { r:'agent', t:"Az arra utal, hogy már a víztaszító képessége is romlott, a repedéseken pedig könnyen beázhat. Gondoltatok már rá, mivel váltanátok ki?" },
+  { r:'user',  t:"Hallottunk a cserepeslemezről, azt mondták könnyű, és nem kell hozzá bontani" },
+  { r:'agent', t:"Pontosan, ez az egyik nagy előnye — a régi pala fölé rá lehet szerelni, bontás nélkül, mert nagyon könnyű anyag, nem terheli túl a tetőszerkezetet. Ez sok idővel és törmelékkel kímél meg titeket." },
+  { r:'user',  t:"Az nagyon jól hangzik, gyorsabb is így gondolom" },
+  { r:'agent', t:"Igen, jelentősen gyorsabb, mintha le kéne bontani az egészet. Mekkora nagyjából a tetőfelület?" },
+  { r:'user',  t:"Körülbelül 110 négyzetméter" },
+  { r:'agent', t:"Rendben, 110 m². A tetőszerkezetet — a faanyagot — érdemes megnézni bontás nélkül is, vagy biztosan jó állapotban van?" },
+  { r:'user',  t:"Azt nem tudjuk pontosan, régóta nem néztük" },
+  { r:'agent', t:"A helyszíni felmérésen ezt is átnézzük, még ha nem is bontunk, a hozzáférhető részeket meg tudjuk vizsgálni. Van a tetőn kémény vagy más áttörés, amit körbe kell dolgozni?" },
+  { r:'user',  t:"Van egy kémény rajta" },
+  { r:'agent', t:"Azt is átdolgozzuk az új fedéssel együtt. Milyen színben gondolkodtatok a cserepeslemeznél?" },
+  { r:'user',  t:"Valami sötétbarna vagy antracit jó lenne" },
+  { r:'agent', t:"Azok a legnépszerűbb választások, jól mutatnak, és nem fakulnak annyira, mint a világosabb színek. Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Minél előbb, mielőtt beázik valahol komolyabban" },
+  { r:'agent', t:"Mivel nem kell bontani, ez gyorsan megy — pár napon belül el tudjuk kezdeni. Melyik városban van a ház?" },
+  { r:'user',  t:"Gödöllőn" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"1,6 és 2,1 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, a kéményátdolgozással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Varga László" },
+  { r:'agent', t:"Köszönöm, László — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0171" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"laszlo.varga@gmail.com" },
+  { r:'agent', t:"Köszönöm, László — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 1_580_000, mid: 1_690_000, upper: 1_850_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + tetőszerkezet ellenőrzés',        amt:   30_000 },
+    { label:'Cserepeslemez — anyag (110 m²)',                       amt:  780_000 },
+    { label:'Alátétfólia + ellenléc',                                amt:  140_000 },
+    { label:'Rátétes szerelés — munkadíj (bontás nélkül)',          amt:  420_000 },
+    { label:'Kéményszegély átdolgozása',                            amt:   90_000 },
+    { label:'Élgerinc- és szegélyelemek',                           amt:  110_000 },
+    { label:'Ereszcsatorna igazítása az új fedéshez',               amt:   80_000 },
+    { label:'Törmelék- és hulladékelszállítás',                     amt:   40_000 },
+  ],
+  customer: {
+    'Name':'László Varga',
+    'Phone':'+36 30 555 0171',
+    'Email':'laszlo.varga@gmail.com',
+  },
+  timingShort: '4–5 munkanap',
+  jobTags: ['110 m²-es palatető felújítása', 'Cserepeslemez — bontás nélküli rátétes technika', 'Kéményszegély átdolgozása', 'Antracit/sötétbarna színválasztás', 'Gyors kivitelezés', '2 generációs családi vállalkozás'],
+  budget: { low: 1_600_000, high: 2_100_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Gödöllő', clientZip: '2100',
+  companyCity: 'Budapest', distanceMi: 28,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
