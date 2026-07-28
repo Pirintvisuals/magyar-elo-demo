@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Házrehab Bau Kft. · Mosonmagyaróvár (border town,
+       hence "Bau" in the name). Logo tagline "Minden ami felújítás" (general,
+       all-purpose renovation) used verbatim for the hero tagline.
+       Angle: every other general-renovation demo so far is INTERIOR work
+       (Törtei's extension, Inverto's panel gut-reno, Lakásfelújítók's
+       kitchen prep, Eger Mester's living-room finish) — this one is the
+       first EXTERIOR/facade scenario: homlokzati hőszigetelés (external wall
+       insulation) on an uninsulated 1990s house, EPS vs kőzetgyapot material
+       choice, cracked render at window reveals (thermal-bridge explanation),
+       and a separate lábazat (plinth) finish — genuinely different trade
+       shape from anything else in the gallery.
+       Logo `hazrehab-logo.jpg` — monochrome black/white circular badge, no
+       distinctive colour to sample (like Szakszig's mark), so THEME (olive
+       green) is a fresh thematic choice — every other palette so far is
+       brown/gold/teal/blue/red/navy, olive was still open.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — olive green, a fresh thematic choice (logo is monochrome b/w).
+const THEME = {
+  bg:'#0d0f0a', dark:'#1f2417', mid:'#3d4a2a', brand:'#5c6e3a', bright:'#8ba852',
+  dot:'#a9c96e', chatBg:'#f7f8f0', tint:'#eaf0dc', tint2:'#f2f6e8', line:'#e1e8d0',
+  ink:'#3d4a2a', inkSoft:'#5c6e3a', ring:'rgba(92,110,58,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Házrehab Bau Kft.',
+    sub: 'Homlokzati hőszigetelés · Teljeskörű felújítás',
+    tagline: 'Mosonmagyaróvár · Minden ami felújítás',
+    initial: 'H',
+    logoSrc: 'hazrehab-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'homlokzatfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '18:27',
+  ownerBenefit: 'Rögzítve és minősítve 18:27-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a homlokzati felújításra?" },
+  { r:'user',  t:"Igen, a házunk homlokzatát kellene hőszigetelni és felújítani" },
+  { r:'agent', t:"Milyen korú a ház, és van-e már valamilyen szigetelés rajta?" },
+  { r:'user',  t:"Az 1990-es években épült, szigetelés nincs rajta" },
+  { r:'agent', t:"Akkor egyértelműen megéri most pótolni, a fűtésszámlán is érezni fogjátok a különbséget. Nagyjából mekkora a homlokzat felülete?" },
+  { r:'user',  t:"Kábé 160 négyzetméter körül lehet, egyszintes a ház" },
+  { r:'agent', t:"Rendben, 160 m². Polisztirol (EPS) vagy kőzetgyapot szigetelésre gondoltatok?" },
+  { r:'user',  t:"Nem tudjuk pontosan a kettő közti különbséget" },
+  { r:'agent', t:"A polisztirol olcsóbb, és jó hőszigetelő, a kőzetgyapot drágább, de tűzálló és jobban szellőzik — tűzfal közelében vagy társasháznál gyakran ezt kérik. Önálló családi háznál a legtöbben a polisztirolt választják, kivéve, ha kifejezetten a tűzállóság miatt szeretnék a másikat." },
+  { r:'user',  t:"Akkor a polisztirol jó lesz nekünk, önálló házunk van" },
+  { r:'agent', t:"Rendben. A jelenlegi vakolat milyen állapotban van — repedezett, vagy csak fakó a színe?" },
+  { r:'user',  t:"Több helyen is berepedt, főleg az ablakok körül" },
+  { r:'agent', t:"Azok tipikusan a hőhidas pontok, ahol a legjobban mozog a fal. A szigetelés pont ezt oldja meg, mert a hőhidat is lefedi. Milyen színben gondolkodtatok a végleges vakolatnál?" },
+  { r:'user',  t:"Valami világos szürkés vagy krémszínű jó lenne" },
+  { r:'agent', t:"Azok most a legnépszerűbb választások, jól mutatnak, és nem fakulnak annyira, mint a fehér. A lábazatot — az alsó, kb egyméteres sávot — külön anyaggal szoktuk kezelni, mert az van kitéve legjobban a nedvességnek és a kopásnak. Azt is bevállaljuk, ha szeretnétek." },
+  { r:'user',  t:"Igen, azt is kérnénk, mert ott szokott a legrondábban kinézni idővel" },
+  { r:'agent', t:"Jó döntés, egy kőporos vagy mozaikvakolat sokáig kibírja azt a sávot. Van állványzat-elhelyezési korlátozás — szűk az udvar, vagy közel van a szomszéd fala?" },
+  { r:'user',  t:"Az egyik oldalon elég szűk a hely a szomszédig" },
+  { r:'agent', t:"Ezt a helyszíni felmérésen megnézzük, szükség esetén létraállvánnyal vagy kisebb szakaszos állványzattal oldjuk meg azt az oldalt. Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Az ősz beállta előtt jó lenne, amíg még kellemes az idő" },
+  { r:'agent', t:"Az belefér, egy 160 m²-es homlokzatnál kb 3 hét a teljes munka, az időjárástól függően. Mi a pontos cím?" },
+  { r:'user',  t:"Mosonmagyaróváron lakunk" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"2,8 és 3,4 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, a lábazati résszel és az állványzattal együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Szabó Mónika" },
+  { r:'agent', t:"Köszönöm, Mónika — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0154" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"monika.szabo@gmail.com" },
+  { r:'agent', t:"Köszönöm, Mónika — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 2_950_000, mid: 3_150_000, upper: 3_350_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + kiviteli terv',              amt:   50_000 },
+    { label:'Állványzat kiépítése (3 hét bérlés)',             amt:  380_000 },
+    { label:'Régi vakolat javítása, repedések kezelése',        amt:  180_000 },
+    { label:'Polisztirol hőszigetelő lemez — anyag (160 m²)',  amt:  720_000 },
+    { label:'Ragasztás + dübelezés',                            amt:  420_000 },
+    { label:'Üvegszövet háló + alapvakolat',                    amt:  380_000 },
+    { label:'Nemesvakolat — végső réteg (160 m²)',              amt:  560_000 },
+    { label:'Lábazati kőporos vakolat (kb 30 fm)',              amt:  260_000 },
+    { label:'Ablakpárkányok, csatlakozó szegélyek',             amt:  140_000 },
+    { label:'Törmelékszállítás és takarítás',                   amt:   60_000 },
+  ],
+  customer: {
+    'Name':'Mónika Szabó',
+    'Phone':'+36 20 555 0154',
+    'Email':'monika.szabo@gmail.com',
+  },
+  timingShort: '3 hét',
+  jobTags: ['160 m²-es homlokzati hőszigetelés', 'Polisztirol (EPS) szigetelés', 'Repedt vakolat javítása', 'Lábazati kőporos vakolat', 'Nemesvakolat — világos szürke/krém', 'Egyszintes családi ház'],
+  budget: { low: 2_800_000, high: 3_400_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Mosonmagyaróvár', clientZip: '9200',
+  companyCity: 'Mosonmagyaróvár', distanceMi: 4,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
