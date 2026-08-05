@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Banacraft (Banacall & Trans Kft.) · Budapest X. kerület
+       (Kőbányai út 43/A). Real site copy (lakasfelujitas-sos.hu): teljeskörű
+       lakásfelújítás — falazás, vakolás, betonozás, csempézés, fürdőszoba
+       felújítás, tetőjavítás, hő- és homlokzatszigetelés, nyílászárócsere,
+       festés. 15 év tapasztalat, garancia minden munkára, ingyenes helyszíni
+       felmérés, saját szakembergárda (vízszerelő, villanyszerelő, burkoló,
+       festő egy csapatban). Slogan sampled verbatim from their own copy:
+       "gyors és minőségi munkát, korrekt, piaci áron".
+       Angle: their own fürdőszoba-felújítás page brags about turnaround —
+       "a kis panel fürdőszobákat pár napon belül újítjuk fel bontástól az
+       átadásig" — so this demo is a small PANEL bathroom full gut reno
+       (~4.5 m²) with fixture relocation (fali WC rejtett tartállyal,
+       szintbeni zuhanyzó), leaning on the in-house multi-trade team as the
+       reason they can move that fast without subcontractor handoffs. This
+       differs from Fintor's emergency drain call-out (tiny/urgent) and
+       Inverto's whole-flat panel gut reno (much bigger scope) — same broad
+       "wet room" family, different job shape from both.
+       Logo `banacraft-logo.png` — white bg, navy house-outline mark + navy
+       "CRAFT" wordmark + green "BANA" wordmark, sampled by pixel (navy
+       #213267, green #3eba81). THEME built as a dark navy palette with the
+       green as the primary accent — first navy+green combo in the gallery.
+       Client and company both in Budapest (X. kerület → XIV. kerület,
+       Zugló), short in-city distance rather than inter-city.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — navy + green, sampled from the logo's house-mark and wordmark.
+const THEME = {
+  bg:'#0a1628', dark:'#132644', mid:'#213267', brand:'#3eba81', bright:'#5ed99f',
+  dot:'#8aeac0', chatBg:'#f4faf7', tint:'#dcf3e7', tint2:'#ebf8f1', line:'#d3ece0',
+  ink:'#213267', inkSoft:'#3eba81', ring:'rgba(62,186,129,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Banacraft',
+    sub: 'Lakásfelújítás · Fürdőszoba felújítás · Tetőjavítás',
+    tagline: 'Budapest, X. kerület · Gyors és minőségi munka, korrekt áron',
+    initial: 'B',
+    logoSrc: 'banacraft-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'fürdőszoba felújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '21:08',
+  ownerBenefit: 'Rögzítve és minősítve 21:08-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a fürdőszoba felújítására?" },
+  { r:'user',  t:"Igen, a fürdőnket szeretnénk teljesen felújítani" },
+  { r:'agent', t:"Nagyszerű, ez az egyik fő szakterületünk. Panellakásban van a fürdő, vagy hagyományos téglaépületben?" },
+  { r:'user',  t:"Panellakásban, egy X. kerületi lakótelepen" },
+  { r:'agent', t:"Rendben, az ilyen kis panelfürdőket gyakran pár nap alatt megoldjuk bontástól az átadásig, mert a vízszerelő, villanyszerelő, burkoló és festő is a saját csapatunkból dolgozik rajta. Nagyjából mekkora a helyiség alapterülete?" },
+  { r:'user',  t:"Elég kicsi, olyan 4,5 négyzetméter" },
+  { r:'agent', t:"Értem. Mi indokolja most a felújítást — elavult a csempe, vagy az elrendezést is szeretnétek változtatni?" },
+  { r:'user',  t:"Mindkettő — a csempe nagyon régi, és a WC-t is szeretnénk máshova tenni" },
+  { r:'agent', t:"A szaniterek áthelyezése új víz- és lefolyó-szakaszt igényel, azt a saját vízszerelőnk oldja meg, nem kell külön embert hívnotok hozzá. Milyen WC-re gondoltatok — álló, vagy fali, rejtett tartállyal?" },
+  { r:'user',  t:"Fali WC-t szeretnénk, rejtett tartállyal, az jobban mutat" },
+  { r:'agent', t:"Az praktikus is, könnyebb körülötte takarítani, és helyet spórol egy ilyen kis helyiségben. A zuhanyzó marad zuhanytálcás, vagy inkább egy szintbeni, süllyesztett lefolyós megoldást szeretnétek?" },
+  { r:'user',  t:"Szeretnénk, ha nem lenne szint, könnyebb lenne bejönni vele" },
+  { r:'agent', t:"Egyre népszerűbb megoldás, süllyesztett lefolyóval oldjuk meg, hogy ne kelljen kilépő él. Milyen csempét képzeltek el — nagyméretű, egyszínű, vagy inkább mintás?" },
+  { r:'user',  t:"Valami nagyméretű, világos, egyszínű csempét szeretnénk, mert világosabbá tenné a helyiséget" },
+  { r:'agent', t:"Jó választás egy ilyen kis alapterületnél, optikailag is nagyobbnak hat tőle. Az elektromos hálózatot is érdemes átnézni ilyenkor — a régi konnektorok, kapcsolók megfelelnek a nedves helyiségre vonatkozó előírásoknak?" },
+  { r:'user',  t:"Fogalmam sincs, elég régi az egész, lehet hogy nem" },
+  { r:'agent', t:"Ezt a felmérésen ellenőrizzük, szükség esetén cseréljük az érintésvédelmi előírásoknak megfelelőre — ezt is a saját villanyszerelőnk végzi. Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Minél hamarabb, ha lehet pár héten belül" },
+  { r:'agent', t:"Ekkora fürdőnél ez simán belefér, jellemzően 8-12 nap alatt végzünk bontástól átadásig. Melyik kerületben van a lakás?" },
+  { r:'user',  t:"XIV. kerületben, Zuglóban" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok a felújításra?" },
+  { r:'user',  t:"1,3 és 1,7 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, a szaniterek áthelyezésével és a fali WC-vel együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Kovács Petra" },
+  { r:'agent', t:"Köszönöm, Petra — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0182" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"petra.kovacs@gmail.com" },
+  { r:'agent', t:"Köszönöm, Petra — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 1_400_000, mid: 1_480_000, upper: 1_580_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Bontás — régi csempe, szaniterek eltávolítása',          amt:  90_000 },
+    { label:'Vízszerelés — szaniterek áthelyezése, új vezetékek',      amt: 220_000 },
+    { label:'Elektromos szerelés — nedves helyiségre engedélyezett hálózat', amt: 110_000 },
+    { label:'Vízszigetelés a burkolat alá',                            amt:  80_000 },
+    { label:'Fal- és padlóburkolás — nagyméretű csempe (kb 23 m²)',    amt: 380_000 },
+    { label:'Szintbeni, süllyesztett lefolyós zuhanyzó kialakítása',   amt: 160_000 },
+    { label:'Fali WC beépítése rejtett tartállyal',                    amt: 150_000 },
+    { label:'Szaniterek + csaptelepek beszerzése és felszerelése',     amt: 210_000 },
+    { label:'Festés — mennyezet és nem csempézett falrész',            amt:  45_000 },
+    { label:'Törmelékszállítás és takarítás',                          amt:  35_000 },
+  ],
+  customer: {
+    'Name':'Petra Kovács',
+    'Phone':'+36 30 555 0182',
+    'Email':'petra.kovacs@gmail.com',
+  },
+  timingShort: '8–12 munkanap',
+  jobTags: ['4,5 m²-es panel fürdőszoba teljes felújítása', 'Szaniterek áthelyezése', 'Fali WC rejtett tartállyal', 'Szintbeni, süllyesztett lefolyós zuhanyzó', 'Nagyméretű, világos csempe', 'Saját szakembergárda — bontástól átadásig'],
+  budget: { low: 1_300_000, high: 1_700_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Budapest, XIV. kerület', clientZip: '1145',
+  companyCity: 'Budapest, X. kerület', distanceMi: 6,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
