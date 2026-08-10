@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Zaha Zaha · kazán javítás, Eger. No FB page or
+       website found for this prospect (web search turned up nothing under
+       that name) — only the trade (kazánjavítás) and city (Eger) were
+       given, so the copy stays generic/factual rather than inventing
+       credentials, reviews, or years of experience not confirmed anywhere.
+       Logo note: the file supplied (`zaha zaha logo.jpg`) is a small
+       personal headshot, not a logo graphic — no wordmark, no icon, no
+       brand colour to sample. Flagged this to the user (same situation as
+       Gáz-Lak Mester's excavator-photo "logo") and they explicitly chose to
+       use the photo as-is in the logo slot, same call as that precedent.
+       THEME is therefore a thematic choice, not pixel-sampled: dark
+       slate + flame-orange, evoking a gas burner — a colour combo not yet
+       used elsewhere in the gallery (Gáz-Lak already has yellow, Tetőfedés
+       Szaki already has pure red, Kozák/Házrehab already cover navy/olive).
+       Third Eger-based demo in the gallery (after Eger Mester's painting/
+       finishing work and V&V Gekisz's electrical+plumbing combo) — this one
+       is pure HVAC repair, and deliberately a small-ticket URGENT diagnostic
+       call-out (no hot water, intermittent heating) rather than the planned
+       full boiler replacement already covered by Aqua System (Érd).
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — dark slate + flame-orange, a thematic choice (logo has no colour to sample).
+const THEME = {
+  bg:'#12161c', dark:'#1c232c', mid:'#2b3542', brand:'#e8622c', bright:'#ff8a50',
+  dot:'#ffb385', chatBg:'#fff6f2', tint:'#ffe8dc', tint2:'#fff1ea', line:'#f3d9cb',
+  ink:'#2b3542', inkSoft:'#e8622c', ring:'rgba(232,98,44,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Zaha Zaha',
+    sub: 'Kazán javítás és szerviz',
+    tagline: 'Eger és térsége · Gyors kiszállás, helyszíni diagnosztika',
+    initial: 'Z',
+    logoSrc: 'zaha-zaha-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'kazánjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '17:42',
+  ownerBenefit: 'Rögzítve és minősítve 17:42-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél segítséget kérni a kazán javításához?" },
+  { r:'user',  t:"Igen, elromlott a kazánunk, nincs meleg vizünk" },
+  { r:'agent', t:"Az kellemetlen, nézzük meg gyorsan mi történhetett. Milyen típusú kazán van nálatok — kombi, ami fűt is és a meleg vizet is adja, vagy külön bojler van?" },
+  { r:'user',  t:"Kombi kazán, az fűt is és a meleg vizet is az adja" },
+  { r:'agent', t:"Értem. Mutat valamilyen hibakódot a kijelzőn, vagy csak simán nem indul be?" },
+  { r:'user',  t:"Egy E-vel kezdődő hibakód villog, de nem tudom pontosan mit jelent" },
+  { r:'agent', t:"Az gyakori jelzés, több oka is lehet — leggyakrabban a keringető szivattyú vagy egy érzékelő hibája áll mögötte. Mióta észlelitek a problémát?" },
+  { r:'user',  t:"Tegnap este óta, azóta egyáltalán nincs melegvíz" },
+  { r:'agent', t:"Rendben, ez sürgős eset, igyekszünk még ma kimenni hozzátok. A fűtés közben működik, vagy az is leáll időnként?" },
+  { r:'user',  t:"A fűtés is ki-kihagy, néha magától leáll" },
+  { r:'agent', t:"Az arra utal, hogy a keringetés is érintett lehet, nem csak a melegvíz-rész. Hány éves nagyjából a kazán?" },
+  { r:'user',  t:"Olyan 8-9 éves lehet" },
+  { r:'agent', t:"Az még nem öreg kazán, ilyenkor jellemzően egy-egy alkatrész — szivattyú, érzékelő, gyújtóelektróda — hibásodik meg, nem kell egészet cserélni. A helyszínen megmérjük, és csak azt cseréljük, ami valóban hibás. Volt már rajta felülvizsgálat vagy vízkőtelenítés az utóbbi években?" },
+  { r:'user',  t:"Elég régen volt utoljára ellenőrizve, talán évekkel ezelőtt" },
+  { r:'agent', t:"Akkor a javítással egybekötve elvégezzük a vízkőtelenítést és az égéstermék-elvezetés ellenőrzését is, hogy biztosan biztonságosan működjön utána. Melyik városrészben laktok?" },
+  { r:'user',  t:"Egerben, a Felnémeti úton" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltatok a javításra?" },
+  { r:'user',  t:"Nem tudom pontosan, talán 60-100 ezer forint körül" },
+  { r:'agent', t:"Ez reális, egy alkatrészcserével és a vízkőtelenítéssel együtt jellemzően ebbe a sávba esik. Elkérhetem a neved?" },
+  { r:'user',  t:"Tóth Bence" },
+  { r:'agent', t:"Köszönöm, Bence — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0193" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"bence.toth@gmail.com" },
+  { r:'agent', t:"Köszönöm, Bence — igyekszünk még ma kimenni hozzátok, és most összeállítjuk a tájékoztató árat is." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 72_000, mid: 80_000, upper: 90_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Kiszállás + helyszíni hibafeltárás',        amt: 15_000 },
+    { label:'Keringető szivattyú csere',                  amt: 35_000 },
+    { label:'Vízkőtelenítés + tisztítás',                 amt: 12_000 },
+    { label:'Égéstermék-elvezetés ellenőrzése (CO mérés)', amt:  8_000 },
+    { label:'Beszabályozás + próbaüzem',                  amt: 10_000 },
+  ],
+  customer: {
+    'Name':'Bence Tóth',
+    'Phone':'+36 20 555 0193',
+    'Email':'bence.toth@gmail.com',
+  },
+  timingShort: 'Még aznap',
+  jobTags: ['Kombi kazán — nincs melegvíz', 'Hibakód a kijelzőn', 'Időszakosan leálló fűtés', 'Feltehetően keringető szivattyú hiba', 'Vízkőtelenítés + CO ellenőrzés egybekötve'],
+  budget: { low: 60_000, high: 100_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Eger', clientZip: '3300',
+  companyCity: 'Eger', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
