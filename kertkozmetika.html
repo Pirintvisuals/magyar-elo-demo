@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample · Kertkozmetika Kft. (site branded "KertiÉden") ·
+       Budapest XVII. kerület (1172, Ároktő u. 81). Real site copy
+       (kertieden.hu): founded 2009 per the logo badge itself — matches
+       their own "több mint 15 éves tapasztalat" claim almost exactly —
+       210+ elkészült kert, services kerttervezés / kertépítés (tereprendezés,
+       burkolás, tóépítés, öntözőrendszer, sziklakert, gyepesítés, kerítés) /
+       kertfenntartás (metszés, gyepszellőztetés, fűnyírás, tóápolás,
+       sövénynyírás, avargyűjtés). Real published per-m² price bands pulled
+       straight from their árak page and used to build this estimate's line
+       items (gyepesítés 4 500–6 300 Ft/m², burkolás 25 000–33 000 Ft/m²,
+       automata öntözés 2 500–4 000 Ft/m²) — first demo in the gallery where
+       the source site publishes real rates, so the numbers are grounded in
+       their own pricing rather than estimated from scratch.
+       First LANDSCAPING demo in the gallery — every prior client is a
+       construction/plumbing/roofing/HVAC trade, so this is a genuinely new
+       vertical, not just a new job shape. Scenario: a brand-new-build house
+       with a bare, rubble-strewn 220 m² plot — full from-scratch garden
+       (grading, rolled sod over seed for fast usability, a paved patio,
+       automatic irrigation, a low hedge) rather than a maintenance visit,
+       to show off kertépítés rather than kertfenntartás.
+       Logo `kertkozmetika-logo.png` — dark forest-green circular badge with
+       a cream inner ring, crossed shears/rake mark, olive sprigs; sampled by
+       pixel (green #1d3c34, cream #e2deba). THEME is a fresh forest-green +
+       cream palette — distinct from Házrehab's yellower olive.
+       Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME — forest green + cream, sampled from the circular badge logo.
+const THEME = {
+  bg:'#0d1f1a', dark:'#132e26', mid:'#1d3c34', brand:'#4f9873', bright:'#7cc79f',
+  dot:'#a8e0c2', chatBg:'#faf7ee', tint:'#eee7cf', tint2:'#f5f0e0', line:'#e3dcc0',
+  ink:'#1d3c34', inkSoft:'#4f9873', ring:'rgba(79,152,115,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Kertkozmetika',
+    sub: 'Kertépítés · Kertfenntartás · Kerttervezés',
+    tagline: 'Budapest és Pest megye · 2009 óta, 210+ elkészült kert',
+    initial: 'K',
+    logoSrc: 'kertkozmetika-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'kertépítés',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '16:15',
+  ownerBenefit: 'Rögzítve és minősítve 16:15-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
+    inputPlaceholder: 'Minta — nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS — the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a kert kialakítására?" },
+  { r:'user',  t:"Igen, most készült el a házunk, a kert még teljesen kopár, azt szeretnénk rendbe tenni" },
+  { r:'agent', t:"Ez nálunk gyakori helyzet, sok új építésű háznál a nulláról kezdjük a kertet. Nagyjából mekkora a telek kertrésze?" },
+  { r:'user',  t:"Körülbelül 220 négyzetméter az, amit be szeretnénk rendezni" },
+  { r:'agent', t:"Rendben, 220 m². Van már elképzelésetek, mi legyen rajta — csak gyep, vagy teraszt, esetleg sövényt is terveznétek?" },
+  { r:'user',  t:"Gyep mindenképp kell, és egy kis burkolt teraszrészt is szeretnénk a hátsó ajtó elé" },
+  { r:'agent', t:"Az jó kombináció. A gyepnél magvetést, vagy inkább tekercses gyepet szeretnétek? A tekercses drágább, de pár nap alatt zöld és használható, a magvetés olcsóbb, de hetekig kell várni és óvni, amíg megered." },
+  { r:'user',  t:"Inkább a tekercses gyepet szeretnénk, hogy hamar használható legyen" },
+  { r:'agent', t:"Az praktikus döntés, pláne ha van gyerek vagy kutya a háznál. A teraszrész mekkora nagyjából, és milyen burkolatra gondoltatok?" },
+  { r:'user',  t:"Olyan 20 négyzetméter lenne, valami világos, nem csúszós járólapot szeretnénk" },
+  { r:'agent', t:"Az jó választás egy hátsó teraszhoz, a világos burkolat nem forrósodik fel annyira nyáron sem. Öntözésről gondoskodtatok már valahogy, vagy azt is beterveznétek?" },
+  { r:'user',  t:"Azt is szeretnénk, mert nem szeretnénk nyaranta locsolgatni" },
+  { r:'agent', t:"Egy automata öntözőrendszer pont ezt oldja meg, a gyepesített részt tudjuk vele lefedni, időzítővel. A telek jelenleg milyen állapotú — sík, vagy van rajta törmelék, egyenetlenség az építkezés után?" },
+  { r:'user',  t:"Elég egyenetlen még, maradt rajta törmelék is az építkezésből" },
+  { r:'agent', t:"Azt előbb rendbe kell tenni — talajelőkészítés, tereprendezés, a felesleges törmelék elszállítása —, utána tudunk csak gyepet és burkolatot építeni rá. Gondoltatok valamilyen sövényre vagy növényzetre a kert szélére?" },
+  { r:'user',  t:"Igen, egy alacsony sövényt szeretnénk a kerítés mentén" },
+  { r:'agent', t:"Azt is bevállaljuk, egy puszpáng vagy hasonló könnyen nyírható sövénynövény jól mutat egy ilyen új kertben. Melyik kerületben van a telek?" },
+  { r:'user',  t:"A XVIII. kerületben" },
+  { r:'agent', t:"Nagyjából milyen büdzsével számoltatok az egészre?" },
+  { r:'user',  t:"2 és 2,5 millió forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, a tereprendezéssel, az öntözőrendszerrel és a terasszal együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Kiss Judit" },
+  { r:'agent', t:"Köszönöm, Judit — milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0207" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"judit.kiss@gmail.com" },
+  { r:'agent', t:"Köszönöm, Judit — már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+const EST = {
+  lower: 2_100_000, mid: 2_250_000, upper: 2_400_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés + kertterv',                     amt:  40_000 },
+    { label:'Tereprendezés + talajelőkészítés (220 m²)',         amt: 310_000 },
+    { label:'Gyepesítés — tekercses gyep (160 m²)',              amt: 800_000 },
+    { label:'Automata öntözőrendszer kiépítése (160 m²)',        amt: 480_000 },
+    { label:'Térburkolás — hátsó terasz (20 m²)',                amt: 560_000 },
+    { label:'Sövénynövények ültetése (24 db)',                   amt:  20_000 },
+    { label:'Törmelék- és hulladékelszállítás',                  amt:  40_000 },
+  ],
+  customer: {
+    'Name':'Judit Kiss',
+    'Phone':'+36 20 555 0207',
+    'Email':'judit.kiss@gmail.com',
+  },
+  timingShort: '2–3 hét',
+  jobTags: ['220 m²-es új kert kialakítása', 'Tekercses gyep telepítése (160 m²)', '20 m²-es térburkolt terasz', 'Automata öntözőrendszer', 'Sövénytelepítés a kerítés mentén', 'Teljes tereprendezés az építkezés után'],
+  budget: { low: 2_000_000, high: 2_500_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Budapest, XVIII. kerület', clientZip: '1181',
+  companyCity: 'Budapest, XVII. kerület', distanceMi: 9,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
