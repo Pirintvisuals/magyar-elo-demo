@@ -13,22 +13,25 @@
        after Kertkozmetika to do this): standard kül-beltéri 14–18k,
        standard+viaszolás 32–52k, beltér mélytisztítás 50–60k, korrekciós
        polírozás 80–160k, Gtechniq kerámia bevonat 180–260k.
-       First AUTOMOTIVE demo in the gallery — every prior client is a
+       First AUTOMOTIVE demo in the gallery. Every prior client is a
        construction/plumbing/roofing/HVAC/landscaping trade, so this is a
        new vertical. Scenario leans on their actual accreditation: a
        3-year-old car with swirl marks from automatic car washes, wanting
-       long-term ceramic protection — the agent explains why correction
+       long-term ceramic protection. The agent explains why correction
        polishing has to happen BEFORE ceramic coating (coating seals in
-       whatever's already on the paint), which is genuine domain expertise
-       specific to this trade, not something a generic "car cleaning" bot
-       would know to mention. Also folds in wheel coating and an interior
-       clean as real upsells from their own service list, and mentions the
-       real ~1-month booking wait as a distinct fact from the job's own
+       whatever's already on the paint), genuine domain expertise specific
+       to this trade, not something a generic "car cleaning" bot would know
+       to mention. Also folds in wheel coating and an interior clean as
+       real upsells from their own service list, and mentions the real
+       ~1-month booking wait as a distinct fact from the job's own
        turnaround time (3–4 days of actual work).
-       Logo `csernyik-autokozmetika-logo.jpg` — vivid violet background,
-       white water-drop + car-silhouette mark; sampled by pixel (#7013f7).
-       THEME leans hard into that exact violet — first purple-based palette
+       Logo `csernyik-autokozmetika-logo.jpg`: vivid violet background,
+       white water-drop + car-silhouette mark, sampled by pixel (#7013f7).
+       THEME leans hard into that exact violet, first purple-based palette
        in the gallery.
+       Dialogue rewritten 2026-08-25 for a more natural, shorter-sentence
+       chat cadence and to remove em dashes throughout the file (comments,
+       item labels, jobTags) per Milan's standing no-em-dash preference.
        Data-only file: the engine + styles live in /quote-agent.js + /quote-agent.css. -->
   <link rel="stylesheet" href="/quote-agent.css">
 </head>
@@ -37,14 +40,14 @@
 <div id="widget-root"></div>
 
 <script>
-// 1. THEME — vivid violet, pixel-sampled from the logo's background.
+// 1. THEME. vivid violet, pixel-sampled from the logo's background.
 const THEME = {
   bg:'#140a2e', dark:'#211048', mid:'#3a1a7a', brand:'#7013f7', bright:'#9b5cff',
   dot:'#c39dff', chatBg:'#f8f5ff', tint:'#ece0ff', tint2:'#f3ecff', line:'#ddd0f5',
   ink:'#3a1a7a', inkSoft:'#7013f7', ring:'rgba(112,19,247,0.40)', cta:'#f59e0b', cta2:'#d97706',
 }
 
-// 2. CONFIG — company identity (Calendly link is fixed for every sample)
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
 const CONFIG = {
   brand: {
     name: 'Csernyik Autókozmetika',
@@ -68,13 +71,13 @@ const CONFIG = {
   labels: {
     titleSuffix: 'Azonnali árajánlat (minta)',
     sampleBadge: 'Minta · nem élő rendszer',
-    watchHintPre: 'Koppints a chat buborékra — magától lejátszódik, ',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
     watchHintBold: 'csak nézd',
     watchHintPost: ' ↘',
     replayTitle: 'Újrajátszás',
     closeTitle: 'Bezárás',
-    sampleStrip: 'Minta beszélgetés — automatikusan lejátszva',
-    inputPlaceholder: 'Minta — nem kell gépelni',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
     estimateIntro: 'Itt a becslésed',
     estimateIntroSuffix: 'Így néznek ki a számok:',
     estimatedTotal: 'Becsült összesen',
@@ -84,7 +87,7 @@ const CONFIG = {
     ownerNotifSample: 'Tulajdonosi értesítés · minta',
     howReceives: 'Így értesül róla {name}',
     newLeadPrefix: 'Új',
-    budgetMatchText: 'Költségkeret egyezik — az árajánlat az ügyfél keretén belül van',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
     budgetAboveText: 'Kicsit a megadott keret felett',
     leadLocation: 'Érdeklődő helye',
     fromYou: 'Tőled',
@@ -100,47 +103,47 @@ const CONFIG = {
   },
 }
 
-// 3. MSGS — the conversation (plays itself, always the same single route)
+// 3. MSGS. the conversation (plays itself, always the same single route)
 const MSGS = [
   { r:'agent', t:"Szia! Szeretnél árajánlatot kérni az autód kozmetikázására?" },
-  { r:'user',  t:"Igen, szeretnénk a kocsinkat rendbe tetetni, és valami tartós védelmet is szeretnénk rá" },
-  { r:'agent', t:"Örülök, hogy a tartós védelem érdekel, ez az egyik fő szakterületünk, akkreditált Gtechniq műhelyként dolgozunk. Milyen típusú az autó — személyautó, vagy inkább egy nagyobb terepjáró/furgon?" },
-  { r:'user',  t:"Egy személyautó, egy 3 éves kombi" },
-  { r:'agent', t:"Az pont beleillik abba, amivel dolgozunk, mi személyautókkal és városi terepjárókkal foglalkozunk. Mit vettél észre rajta — fakó a fényezés, vagy inkább apró karcolások, örvénykarcok zavarnak?" },
-  { r:'user',  t:"Főleg apró örvénykarcok az autómosóktól, meg egy kicsit fakónak is tűnik néhol" },
-  { r:'agent', t:"Az klasszikus jele annak, hogy a fényezés felső rétege sérült, tipikusan az automata mosóktól. Egy kerámia bevonat előtt ezt mindenképp érdemes korrekciós polírozással eltávolítani, mert a bevonat konzerválja azt, ami alatta van — ha most raknánk rá kerámiát, az örvénykarcok örökre ott maradnának alatta. Gondoltál már a korrekciós polírozásra, vagy ez most újdonság?" },
+  { r:'user',  t:"Igen, szeretném rendbe tetetni a kocsit, és valami tartós védelem is érdekelne" },
+  { r:'agent', t:"Nálunk pont ez a fő szakterület, akkreditált Gtechniq műhely vagyunk. Milyen autóról van szó? Személyautó, vagy nagyobb terepjáró, esetleg furgon?" },
+  { r:'user',  t:"Személyautó, egy 3 éves kombi" },
+  { r:'agent', t:"Azzal tudunk dolgozni, mi személyautókkal és városi terepjárókkal foglalkozunk. Mit szeretnél javítani rajta? Fakó a fényezés, vagy inkább karcolások zavarnak?" },
+  { r:'user',  t:"Főleg apró örvénykarcok az autómosóktól, és kicsit fakónak is tűnik néhol" },
+  { r:'agent', t:"Ez tipikusan az automata mosóktól jön, attól sérül a fényezés felső rétege. Egy kerámia bevonat előtt ezt korrekciós polírozással érdemes eltávolítani. A bevonat ugyanis konzerválja, ami alatta van, szóval az örvénykarcok örökre bent maradnának. Hallottál már a korrekciós polírozásról?" },
   { r:'user',  t:"Hallottam róla, de nem tudtam, hogy ennyire fontos a bevonat előtt" },
-  { r:'agent', t:"Sokan nincsenek ezzel tisztában, pedig ez a legfontosabb lépés egy jó eredményhez. A korrekció után jön a kerámia bevonat, ami utána évekig könnyebbé teszi a tisztántartást, és véd a UV-tól és a vegyszerektől. A belső térrel mi a helyzet — ott is szeretnél valamit, vagy csak kívül?" },
-  { r:'user',  t:"Belül is ráférne egy alapos tisztítás, van otthon kutyánk, elég koszos az üléshuzat és a szőnyeg" },
-  { r:'agent', t:"Azt is meg tudjuk oldani, vegyszeres mélytisztítással kezeljük az üléshuzatot és a padlószőnyeget. A felnikre gondoltál már valamilyen bevonatra? Azok szoktak leghamarabb piszkolódni fékportól." },
+  { r:'agent', t:"Sokan nincsenek ezzel tisztában. A korrekció után jön a kerámia, ami utána évekig könnyebbé teszi a tisztántartást, és véd az UV-tól meg a vegyszerektől. Belül mi a helyzet, ott is szeretnél valamit?" },
+  { r:'user',  t:"Igen, ráférne egy alapos tisztítás, van kutyánk, elég koszos az üléshuzat és a szőnyeg" },
+  { r:'agent', t:"Azt vegyszeres mélytisztítással oldjuk meg. A felnikre gondoltál már valamilyen bevonatra? Azok szoktak leghamarabb piszkolódni a fékportól." },
   { r:'user',  t:"Arra még nem gondoltam, de ha megéri, azt is kérem" },
-  { r:'agent', t:"Megéri, sokkal könnyebb lemosni utána, és ritkábban kell fékport takarítani róluk. Most szeretnéd lefoglalni az időpontot, vagy még csak tájékozódsz?" },
-  { r:'user',  t:"Most szeretném, mielőbb szeretném lefoglalni az időpontot" },
-  { r:'agent', t:"Érdemes is, jelenleg körülbelül egy hónapos várólistával dolgozunk, úgyhogy minél előbb foglalsz, annál hamarabb sorra kerülsz. Nyíregyházán vagy a környékén vagy?" },
+  { r:'agent', t:"Megéri, sokkal könnyebb lemosni utána. Most szeretnéd lefoglalni az időpontot, vagy még csak tájékozódsz?" },
+  { r:'user',  t:"Most szeretném, mielőbb be szeretnék kerülni" },
+  { r:'agent', t:"Jó, mert most kábé egy hónapos várólistával megyünk, szóval minél előbb foglalsz, annál hamarabb kerülsz sorra. Nyíregyházán vagy a környékén laksz?" },
   { r:'user',  t:"Nyíregyházán lakom" },
-  { r:'agent', t:"Az remek, közel vagy hozzánk. Nagyjából milyen büdzsével számoltál az egészre, a korrekciós polírozással, a kerámia bevonattal és a beltéri tisztítással együtt?" },
+  { r:'agent', t:"Az jó, közel vagy hozzánk. Nagyjából mekkora büdzsével számoltál az egészre, polírozással, bevonattal, beltéri tisztítással együtt?" },
   { r:'user',  t:"380 és 460 ezer forint között gondoltam" },
   { r:'agent', t:"Ez reális erre a csomagra, a felni bevonattal együtt is. Elkérhetem a neved?" },
   { r:'user',  t:"Varga Zsolt" },
-  { r:'agent', t:"Köszönöm, Zsolt — milyen számon érünk el a legkönnyebben?" },
+  { r:'agent', t:"Köszönöm, Zsolt. Milyen számon érünk el a legkönnyebben?" },
   { r:'user',  t:"+36 30 555 0221" },
   { r:'agent', t:"És az email címed?" },
   { r:'user',  t:"zsolt.varga@gmail.com" },
-  { r:'agent', t:"Köszönöm, Zsolt — már állítjuk is össze a tájékoztató árat." },
+  { r:'agent', t:"Köszönöm, Zsolt, már állítjuk is össze a tájékoztató árat." },
   { r:'estimate' }
 ]
 
-// 4. EST — itemised quote + lead card (items must sum to EST.mid)
+// 4. EST. itemised quote + lead card (items must sum to EST.mid)
 const EST = {
   lower: 390_000, mid: 420_000, upper: 460_000,
   status: 'PRIORITY',
   items: [
-    { label:'Helyszíni állapotfelmérés + konzultáció',                amt: 15_000 },
-    { label:'Kárpittisztítás — üléshuzat + padlószőnyeg vegyszeres mélytisztítása', amt: 45_000 },
-    { label:'Korrekciós polírozás — örvénykarcok eltávolítása (egy lépéses)', amt: 95_000 },
+    { label:'Helyszíni állapotfelmérés és konzultáció',                amt: 15_000 },
+    { label:'Kárpittisztítás, üléshuzat és padlószőnyeg vegyszeres mélytisztítása', amt: 45_000 },
+    { label:'Korrekciós polírozás, örvénykarcok eltávolítása (egy lépéses)', amt: 95_000 },
     { label:'Gtechniq kerámia bevonat felvitele',                      amt: 210_000 },
     { label:'Felni kerámia bevonat (4 db)',                            amt: 40_000 },
-    { label:'Végső ellenőrzés + minőségbiztosítási dokumentáció',      amt: 15_000 },
+    { label:'Végső ellenőrzés és minőségbiztosítási dokumentáció',      amt: 15_000 },
   ],
   customer: {
     'Name':'Zsolt Varga',
@@ -148,7 +151,7 @@ const EST = {
     'Email':'zsolt.varga@gmail.com',
   },
   timingShort: '3–4 nap',
-  jobTags: ['3 éves kombi — fényezéskorrekció + kerámia védelem', 'Korrekciós polírozás — örvénykarcok eltávolítása', 'Gtechniq kerámia bevonat', 'Felni kerámia bevonat (4 db)', 'Kárpittisztítás — üléshuzat + padlószőnyeg', 'Akkreditált Gtechniq műhely'],
+  jobTags: ['3 éves kombi, fényezéskorrekció és kerámia védelem', 'Korrekciós polírozás az örvénykarcok eltávolítására', 'Gtechniq kerámia bevonat', 'Felni kerámia bevonat (4 db)', 'Kárpittisztítás, üléshuzat és padlószőnyeg', 'Akkreditált Gtechniq műhely'],
   budget: { low: 380_000, high: 460_000 },
   score: 95, scoreLabel: 'Prémium érdeklődő',
   clientCity: 'Nyíregyháza', clientZip: '4400',
