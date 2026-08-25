@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Csergő Szabolcs. Solo háztartásigép-szerelő, Várpalota
+       (Bezerédi utca 26, Veszprém megye). Note: Milan's message named this
+       prospect "gergo szabolcs" but the logo itself reads "Csergő
+       Szabolcs", confirmed by a real regionaliskiado.hu directory listing
+       for the same trade and town, so the file, brand name and dialogue all
+       use the corrected name.
+       A one-person business, not a Kft, so unlike every other demo in the
+       gallery the agent speaks in first person singular throughout (kimegyek,
+       megnézem, érlek el) rather than the usual "mi/nálunk" plural a
+       company would use. Real facts are thin here, just the FB bio Milan
+       pasted ("Háztartásigépek javítása, alkatrészek") plus the one
+       directory listing, so the copy stays factual rather than inventing
+       years of experience or credentials that aren't confirmed anywhere,
+       same approach as the Zaha Zaha demo.
+       Second appliance repair demo in the gallery after Sugár Szerviz, so
+       needed real differentiation: a different appliance (fridge, not a
+       washing machine), a different fault (thermostat/relay, not a drain
+       pump), and it leans on the "alkatrészek" half of this prospect's own
+       bio that Sugár Szerviz's copy never mentioned. The customer
+       considered ordering the part themselves and fitting it, and the
+       agent's pitch is specifically about the risk of guessing the wrong
+       part versus an on-site diagnosis paired with the correct part and a
+       warranty on the install, a genuine solo-tradesman-with-parts-stock
+       angle. Client placed in Berhida, a real small neighbouring town
+       about 6 km from Várpalota, rather than the same town, since a solo
+       repairer plausibly covers a tight local radius rather than a whole
+       county.
+       Logo `csergo-szabolcs-logo.jpg`: white background, black wordmark,
+       a soft periwinkle recycling-arrows icon, sampled by pixel (icon
+       #9bbaf0). THEME pairs a near-black navy base with that exact
+       periwinkle as the accent, distinct from Fintor's vivid cyan-blue and
+       Aqua System's grey-blue, both more saturated and cooler.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. near-black navy base, periwinkle accent sampled from the logo icon.
+const THEME = {
+  bg:'#0d1220', dark:'#161d33', mid:'#243154', brand:'#6f8fd9', bright:'#9bbaf0',
+  dot:'#c3d6f7', chatBg:'#f5f7fd', tint:'#e3eafb', tint2:'#eef2fc', line:'#d7e0f5',
+  ink:'#243154', inkSoft:'#6f8fd9', ring:'rgba(111,143,217,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Csergő Szabolcs',
+    sub: 'Háztartási gépek javítása és alkatrészek',
+    tagline: 'Várpalota és környéke',
+    initial: 'C',
+    logoSrc: 'csergo-szabolcs-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'hűtőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '09:33',
+  ownerBenefit: 'Rögzítve és minősítve 09:33-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél segítséget kérni egy háztartási gép javításához?" },
+  { r:'user',  t:"Igen, a hűtőnk nem hűt rendesen, a fagyasztó rész jó, de a hűtőrész langyos" },
+  { r:'agent', t:"Ez gyakori hiba, több oka is lehet. Milyen márkájú a hűtő?" },
+  { r:'user',  t:"Whirlpool, elég régi már, talán 12 éves" },
+  { r:'agent', t:"Annyi idős gépnél tipikusan a ventilátor vagy a termosztát hibásodik meg, de az sem kizárt, hogy a kompresszor gyengül. Van valami szokatlan hang, kattogás vagy zúgás?" },
+  { r:'user',  t:"Van egy halk kattogás időnként, aztán elhallgat" },
+  { r:'agent', t:"Az inkább a termosztátra vagy az indító relére utal, nem a kompresszorra, ami jó hír, azok olcsóbb alkatrészek. Gondoltál már arra, hogy magad rendeled meg az alkatrészt, vagy inkább szeretnéd, ha megnézném és beszerelném?" },
+  { r:'user',  t:"Gondoltam rá, hogy magam rendelem meg, de nem tudom pontosan, melyik kell" },
+  { r:'agent', t:"Ez a gyakori buktató, ugyanarra a tünetre több alkatrész is szóba jöhet, és ha rosszat rendelsz, kétszer fizeted a szállítást is. Kimegyek, megnézem a helyszínen, beazonosítom a hibát, és a megfelelő alkatrésszel térek vissza, garanciával a beszerelésre. Mióta áll fenn a probléma?" },
+  { r:'user',  t:"Kábé egy hete vettük észre" },
+  { r:'agent', t:"Az még nem sürgős, de érdemes hamar megnézetni, mielőtt a kompresszor is túlterhelődik tőle. Melyik településen laksz?" },
+  { r:'user',  t:"Berhidán" },
+  { r:'agent', t:"Az közel van, oda is kijárok. Mikorra szeretnéd, hogy megnézzem?" },
+  { r:'user',  t:"Minél hamarabb, mert most melegszik benne az étel, nem jó így hagyni" },
+  { r:'agent', t:"Igazad van, ezt nem érdemes húzni. Nagyjából milyen összeggel számoltál a javításra, alkatrésszel együtt?" },
+  { r:'user',  t:"20 és 35 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez reális, egy termosztát vagy relé csere jellemzően ebbe a sávba esik. Elkérhetem a neved?" },
+  { r:'user',  t:"Kovács Tímea" },
+  { r:'agent', t:"Köszönöm, Tímea. Milyen számon érlek el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0246" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"timea.kovacs@gmail.com" },
+  { r:'agent', t:"Köszönöm, Tímea, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 27_000, mid: 30_000, upper: 33_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Kiszállás és helyszíni diagnosztika',              amt:  8_000 },
+    { label:'Termosztát csere alkatrésszel',                    amt: 12_000 },
+    { label:'Indító relé ellenőrzése, szükség esetén csere',    amt:  6_000 },
+    { label:'Próbaüzem és hőmérséklet-ellenőrzés',               amt:  4_000 },
+  ],
+  customer: {
+    'Name':'Tímea Kovács',
+    'Phone':'+36 30 555 0246',
+    'Email':'timea.kovacs@gmail.com',
+  },
+  timingShort: '1-2 napon belül',
+  jobTags: ['Whirlpool hűtő, hűtőrész nem hűt megfelelően', 'Helyszíni diagnosztika alkatrész-azonosítással', 'Termosztát csere', 'Indító relé ellenőrzése', 'Garanciális beszerelés'],
+  budget: { low: 20_000, high: 35_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Berhida', clientZip: '8181',
+  companyCity: 'Várpalota', distanceMi: 6,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
