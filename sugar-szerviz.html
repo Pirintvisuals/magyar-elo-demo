@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Sugár Szerviz. Miskolc (Soltész Nagy Kálmán u. 65),
+       serving all of Borsod-Abaúj-Zemplén county. Real site copy
+       (sugarszerviz.hu): brand-independent household appliance repair,
+       home-visit model across the county plus a workshop drop-off for
+       smaller items (vacuum cleaners, coffee makers), real partner brands
+       (Electrolux, Siemens, Gorenje, Neff, Bosch, Hisense, AEG, Zanussi),
+       and a genuine trust detail used as-is in the dialogue: if the
+       appliance turns out unrepairable on inspection, they do not charge a
+       second callout fee, only the original callout stands. Repairs are
+       attempted without parts first where possible. Typical turnaround is
+       "within days" per their own site, used for timingShort.
+       First APPLIANCE REPAIR demo in the gallery, a new vertical distinct
+       from every prior construction/plumbing/roofing/HVAC/landscaping/
+       automotive client. Scenario: a Bosch washing machine that stopped
+       draining mid-cycle with a loud noise beforehand, pointing at the
+       drain pump rather than just a clogged filter, a realistic diagnostic
+       call rather than a big planned project, closer in shape to Zaha
+       Zaha's boiler repair than to any renovation demo, but for a
+       different appliance and trade. Client placed in Kazincbarcika
+       (~24 km from Miskolc, a real distance within the county) rather than
+       same-town, since this business explicitly covers the whole county.
+       Logo `sugar-szerviz-logo.jpg`. white background, mint green washing
+       machine and toolbox illustration with a darker teal green wordmark,
+       sampled by pixel (mint #a1dab7, teal green #358f76). THEME keeps the
+       base neutral steel grey/charcoal rather than green throughout, using
+       the sampled greens only for brand/bright/dot, so it reads as
+       "workshop with a mint accent" rather than colliding with
+       Kertkozmetika's all-forest-green palette which samples a similar hue.
+       Dialogue written short and without em dashes throughout, matching
+       Milan's standing preference from the Csernyik demo rewrite.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. steel grey base, mint green accent sampled from the logo.
+const THEME = {
+  bg:'#12181a', dark:'#1c2528', mid:'#2b383c', brand:'#4fa98a', bright:'#7dd6b0',
+  dot:'#a8e8c8', chatBg:'#f5faf7', tint:'#dff2e8', tint2:'#ebf7f0', line:'#d5ebe0',
+  ink:'#2b383c', inkSoft:'#4fa98a', ring:'rgba(79,169,138,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Sugár Szerviz',
+    sub: 'Háztartási gépek javítása márkafüggetlenül',
+    tagline: 'Miskolc, Borsod-Abaúj-Zemplén megye egész területén',
+    initial: 'S',
+    logoSrc: 'sugar-szerviz-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'mosógépjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '11:47',
+  ownerBenefit: 'Rögzítve és minősítve 11:47-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél segítséget kérni egy háztartási gép javításához?" },
+  { r:'user',  t:"Igen, a mosógépünk nem ereszti le a vizet, félig tele áll a dobban" },
+  { r:'agent', t:"Ez elég gyakori hiba, jó eséllyel javítható alkatrészcsere nélkül is. Milyen márkájú a gép?" },
+  { r:'user',  t:"Bosch" },
+  { r:'agent', t:"Azzal is dolgozunk, márkafüggetlenül javítunk, Boscht, Siemenst, Gorenjét, Neffet, AEG-et, Zanussit, Electroluxot és Hisense-t is rendszeresen. Hány éves nagyjából a gép?" },
+  { r:'user',  t:"Olyan 6 éves lehet" },
+  { r:'agent', t:"Az még nem öreg gép. Amikor leáll a vízleeresztés, leggyakrabban a szűrő dugul el, vagy a leeresztő szivattyú hibásodik meg. Volt valami szokatlan hang is, mielőtt teljesen leállt?" },
+  { r:'user',  t:"Igen, egy zúgó hang volt, mielőtt leállt" },
+  { r:'agent', t:"Az inkább a szivattyúra utal, nem csak a szűrőre. A helyszínen megnézzük mindkettőt, és ha lehet, alkatrész nélkül próbáljuk megoldani, csak ha muszáj cserélünk. Ha a felmérésen kiderül, hogy nem javítható, nem számolunk fel újabb kiszállási díjat, csak a kiszállás marad, alkatrész és munkadíj nélkül." },
+  { r:'user',  t:"Az jó, legalább nem bukunk rá feleslegesen" },
+  { r:'agent', t:"Pontosan ezért csináljuk így. Egy mosógépnél mindig házhoz megyünk, csak a kisebb gépeket, mint a porszívó vagy a kávéfőző, kérjük be a szervizbe. Melyik településen laktok?" },
+  { r:'user',  t:"Kazincbarcikán" },
+  { r:'agent', t:"Az rendben van, Borsod-Abaúj-Zemplén egész területén dolgozunk. Mikorra szeretnétek, hogy kimenjünk?" },
+  { r:'user',  t:"Minél hamarabb, mert most kézzel kell mosnunk mindent" },
+  { r:'agent', t:"Értem, jellemzően pár napon belül tudunk kimenni egy bejelentés után. Nagyjából milyen összeggel számoltatok a javításra?" },
+  { r:'user',  t:"45 és 70 ezer forint között gondoltuk" },
+  { r:'agent', t:"Ez reális, a szivattyú cseréjével együtt is jellemzően ebbe a sávba esik. Elkérhetem a neved?" },
+  { r:'user',  t:"Nagy Erika" },
+  { r:'agent', t:"Köszönöm, Erika. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0238" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"erika.nagy@gmail.com" },
+  { r:'agent', t:"Köszönöm, Erika, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 52_000, mid: 58_000, upper: 65_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Kiszállás és helyszíni diagnosztika',            amt: 12_000 },
+    { label:'Elzáródott szűrő és leeresztő rendszer tisztítása', amt: 15_000 },
+    { label:'Leeresztő szivattyú csere',                       amt: 22_000 },
+    { label:'Próbaüzem és beállítás',                          amt:  9_000 },
+  ],
+  customer: {
+    'Name':'Erika Nagy',
+    'Phone':'+36 20 555 0238',
+    'Email':'erika.nagy@gmail.com',
+  },
+  timingShort: 'Pár napon belül',
+  jobTags: ['Bosch mosógép, vízleeresztési hiba', 'Helyszíni diagnosztika alkatrész nélküli javítási kísérlettel', 'Leeresztő szivattyú csere', 'Nincs második kiszállási díj, ha nem javítható', 'Márkafüggetlen szerviz'],
+  budget: { low: 45_000, high: 70_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Kazincbarcika', clientZip: '3700',
+  companyCity: 'Miskolc', distanceMi: 24,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
