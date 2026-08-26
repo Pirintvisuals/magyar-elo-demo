@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Glass Mechanix Dombóvár Partner (real local business
+       name is "Szélvédő Javítás Dombóvár", owner Máté Valentin), a local
+       licensed operator of the Glass Mechanix windscreen repair technology.
+       Real site copy (szelvedojavitasdombovar.hu): 7200 Dombóvár, Kórház
+       utca 55, workshop in the Lidl parking lot, free mobile callout to
+       Dombóvár and surrounding settlements at the same price as the
+       workshop, completed in max 30 minutes, real published price band
+       5,000-15,000 Ft depending on damage TYPE not size, lifetime warranty
+       ("élettartam garancia"), open daily 7-20h. Line items built inside
+       their real published band rather than guessed from scratch.
+       Solo operator, not a Kft, so the agent speaks in first person
+       singular throughout (kimegyek, garanciát adok, a műhelyem), same
+       approach as the Csergő Szabolcs demo.
+       First windscreen/auto-glass demo in the gallery, and a genuinely
+       different automotive job shape from Csernyik Autókozmetika (cosmetic
+       detailing, days of work) despite both being car-trade demos: this is
+       a quick 30-minute structural safety repair. Scenario leans on real
+       expertise a technician would actually have: not every chip is
+       repairable, damage directly in the driver's primary sightline or
+       past a certain crack length often needs replacement instead of
+       repair because of leftover optical distortion, a genuine
+       differentiator beat the same way Csernyik's correction-before-coating
+       explanation was.
+       Logo `glass-mechanix-dombovar-logo.png`. white background, vivid red
+       wordmark and circular car+wrench icon, black "DOMBÓVÁR PARTNER"
+       subtext, sampled by pixel (#db0000). THEME deliberately differs from
+       Tetőfedés Szaki's red palette, that one washes the whole dark base in
+       brick maroon (#100809/#2b0d0f/#5c1418), this one keeps bg/dark/mid
+       true neutral black/charcoal and uses the red only as a sharp accent,
+       a black-and-red racing-stripe read rather than an all-over maroon one.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. true black and charcoal base, vivid red accent sampled from the logo.
+const THEME = {
+  bg:'#0a0a0a', dark:'#161616', mid:'#262626', brand:'#db0000', bright:'#ff3333',
+  dot:'#ff7a7a', chatBg:'#fff5f5', tint:'#ffe0e0', tint2:'#ffecec', line:'#f5d0d0',
+  ink:'#262626', inkSoft:'#db0000', ring:'rgba(219,0,0,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Glass Mechanix Dombóvár',
+    sub: 'Szélvédő javítás, Máté Valentin',
+    tagline: 'Dombóvár és környéke, 30 percen belül, élettartam garanciával',
+    initial: 'G',
+    logoSrc: 'glass-mechanix-dombovar-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'szélvédőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '16:04',
+  ownerBenefit: 'Rögzítve és minősítve 16:04-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédő javítására?" },
+  { r:'user',  t:"Igen, van egy kavicsfelverődés a szélvédőn, félek, hogy tovább reped" },
+  { r:'agent', t:"Jól teszed, hogy most foglalkozol vele, egy kis kőfelverődésből könnyen nagy repedés lesz, ha ráfagy vagy hőingadozás éri. Mekkora nagyjából a sérülés, egy körömnyi, vagy már el is indult belőle egy repedés?" },
+  { r:'user',  t:"Olyan egy forintérme nagyságú, és van belőle egy pici repedés is, talán 2 centis" },
+  { r:'agent', t:"Az még simán javítható, a 15 centinél rövidebb repedéseket és a kisebb kőfelverődéseket szinte mindig meg lehet oldani gyanta befecskendezésével. Hol helyezkedik el a szélvédőn, a vezető közvetlen látóterében van, vagy inkább szélen, esetleg az utas oldalán?" },
+  { r:'user',  t:"Kicsit jobbra van a közepétől, nem pont a vezető szeme előtt" },
+  { r:'agent', t:"Az jó hír, mert ha pont a vezető fő látóterébe esne, ott bizonyos esetekben inkább cserét javasolnék, mert a javítás után maradhat egy apró optikai torzulás, ami zavaró lehet vezetés közben. Ott, ahol most van, simán javítható. Szeretnéd, hogy kimenjek hozzád, vagy inkább bejönnél a Lidl parkolóba, ott van a műhelyem?" },
+  { r:'user',  t:"Inkább kimennél, ha megoldható, mert nehezen tudok most elszabadulni" },
+  { r:'agent', t:"Megoldható, ugyanannyiba kerül, akár kimegyek, akár bejössz, Dombóváron és a környező településeken is vállalom díjmentes kiszállással. Mikor lenne jó időpont?" },
+  { r:'user',  t:"Minél hamarabb, holnap délelőtt jó lenne" },
+  { r:'agent', t:"Az belefér, egy ilyen javítás max 30 perc alatt kész, szóval nem kell hosszan várakoznod mellette. A munkára élettartam garanciát adok, ha valami gond lenne vele, ingyen visszajavítom. Melyik településen laksz?" },
+  { r:'user',  t:"Dombóváron" },
+  { r:'agent', t:"Az remek, akkor nem kell külön utazgatnod. Nagyjából milyen összeggel számoltál a javításra?" },
+  { r:'user',  t:"8 és 15 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez reális, a sérülés típusától függ pontosan, de ekkora, ilyen jellegű kárnál általában ebbe a sávba esik. Elkérhetem a neved?" },
+  { r:'user',  t:"Farkas Dóra" },
+  { r:'agent', t:"Köszönöm, Dóra. Milyen számon érlek el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0259" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"dora.farkas@gmail.com" },
+  { r:'agent', t:"Köszönöm, Dóra, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 10_000, mid: 12_000, upper: 14_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés és sérülés tisztítása',       amt: 3_000 },
+    { label:'Gyantás javítás UV-lámpás kikeményítéssel',      amt: 7_000 },
+    { label:'Polírozás és minőségellenőrzés',                 amt: 2_000 },
+  ],
+  customer: {
+    'Name':'Dóra Farkas',
+    'Phone':'+36 30 555 0259',
+    'Email':'dora.farkas@gmail.com',
+  },
+  timingShort: '30 percen belül',
+  jobTags: ['Kőfelverődés és kb 2 cm-es repedés', 'Nem a vezető közvetlen látóterében', 'Gyantás javítás UV-kikeményítéssel', 'Díjmentes helyszíni kiszállás Dombóváron', 'Élettartam garancia'],
+  budget: { low: 8_000, high: 15_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Dombóvár', clientZip: '7200',
+  companyCity: 'Dombóvár', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
