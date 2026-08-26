@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Autóüveg Centrum Debrecen. Real site copy
+       (autouvegcentrumdebrecen.hu): 4031 Debrecen, István út 149, contact
+       Kiss Gábor, real published chip-repair starting price "már 8000
+       forinttól", OEM vs "utángyártott" (aftermarket) glass choice for
+       replacements, comprehensive casco handling, same-day/next-day
+       appointments, free parking and a comfortable waiting area,
+       professional vacuuming after replacement, 1-year leak warranty.
+       Third windscreen demo in the gallery and the second one actually
+       IN Debrecen (after Autóüveg Debrecen Kft), so it needed real
+       differentiation, not just a reskin. That demo's whole angle is full
+       casco claim administration and ADAS camera recalibration on a modern
+       car, quoting the customer's out-of-pocket deductible rather than the
+       full job cost. This one deliberately goes the other way: a customer
+       who HAS casco but chooses not to claim it (a genuine, common
+       consideration, filing a small glass claim can affect next year's
+       bonus-malus rating), paying out of pocket instead, which makes the
+       real OEM-vs-aftermarket glass price tradeoff the actual decision
+       point, something the other Debrecen demo never touches since casco
+       there pays for OEM-equivalent replacement regardless of cost. Also
+       used an older car with no ADAS camera on purpose so this demo
+       doesn't repeat that beat, and leaned on the real comfort details
+       (free parking, waiting area, vacuuming, 1-year leak warranty)
+       instead.
+       Color note: the logo's blue (#01a0e2) sampled almost identically to
+       Fintor's (#01a5ec) and closely to Autóüveg Debrecen's (#008dd2),
+       three vivid-blue Hungarian trade logos landing in nearly the same
+       hue. Rather than force a different color that wouldn't match the
+       real logo, THEME differentiates through the surrounding palette: a
+       deep navy-black base (not Fintor's flat matte black, not Autóüveg
+       Debrecen's neutral charcoal grey) so the blue reads as a glowing
+       accent against a "night sky" rather than sitting on flat black or
+       grey. Still a real hue collision worth knowing about if the gallery
+       index is ever shown side by side.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. deep navy-black base, vivid cyan-blue accent sampled from the logo.
+const THEME = {
+  bg:'#050e18', dark:'#0b1c2e', mid:'#123049', brand:'#01a0e2', bright:'#3dc2f5',
+  dot:'#7edcfb', chatBg:'#f2fbff', tint:'#dcf2fc', tint2:'#ebf8fd', line:'#cde8f5',
+  ink:'#123049', inkSoft:'#01a0e2', ring:'rgba(1,160,226,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Autóüveg Centrum Debrecen',
+    sub: 'Szélvédőcsere és javítás, kőfelverődés már 8000 Ft-tól',
+    tagline: 'Debrecen, ingyenes parkolás és kényelmes váró',
+    initial: 'A',
+    logoSrc: 'autouveg-centrum-debrecen-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőcsere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '14:19',
+  ownerBenefit: 'Rögzítve és minősítve 14:19-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédőd cseréjére vagy javítására?" },
+  { r:'user',  t:"Igen, a szélvédőm eléggé berepedt, azt hiszem cserélni kell" },
+  { r:'agent', t:"Mekkora most a repedés, és honnan indult?" },
+  { r:'user',  t:"Egy kőfelverődésből indult ki ősszel, azóta a fagyok alatt majdnem az egész szélvédőn végigfutott" },
+  { r:'agent', t:"Ennyire elterjedt repedésnél sajnos már nem javítás, hanem csere a megoldás. Van casco biztosításod a kocsira?" },
+  { r:'user',  t:"Van, de inkább nem szeretném igénybe venni, mert félek, hogy megemeli a következő évi díjat" },
+  { r:'agent', t:"Ez teljesen érthető, sokan hasonlóan döntenek egy ilyen kisebb kárnál. Enélkül két irányba mehetünk, gyári (OEM) üveggel, ami drágább, de pontosan olyan minőségű, mint az eredeti, vagy utángyártott üveggel, ami jóval olcsóbb, és a legtöbb autónál semmilyen érzékelhető különbség nincs. Milyen autód van?" },
+  { r:'user',  t:"Egy 2011-es Opel Astra" },
+  { r:'agent', t:"Annál a típusnál az utángyártott üveg tökéletesen bevált megoldás szokott lenni, és nincs rajta kamerás vezetéstámogató rendszer sem, ami extra kalibrációt igényelne. Melyiket választanád?" },
+  { r:'user',  t:"Inkább az olcsóbb, utángyártott legyen" },
+  { r:'agent', t:"Jó választás, annál a típusnál nincs is igazán érzékelhető minőségi különbség. Mikorra szeretnéd az időpontot?" },
+  { r:'user',  t:"Minél hamarabb, akár holnapra is jó lenne" },
+  { r:'agent', t:"Az simán megoldható, jellemzően aznap vagy másnap tudunk időpontot adni. Van nálunk ingyenes parkolás, és amíg vársz, kényelmes váróban ülhetsz, a csere alatt ki is porszívózzuk a kocsit. Melyik városban vagy?" },
+  { r:'user',  t:"Debrecenben" },
+  { r:'agent', t:"Az remek, itt vagyunk a közelben. Nagyjából milyen összeggel számoltál a cserére?" },
+  { r:'user',  t:"50 és 65 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez reális egy utángyártott üveggel, a beszerelésre egyébként egy év beázás elleni garanciát is adunk. Elkérhetem a neved?" },
+  { r:'user',  t:"Papp Zoltán" },
+  { r:'agent', t:"Köszönöm, Zoltán. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0271" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"zoltan.papp@gmail.com" },
+  { r:'agent', t:"Köszönöm, Zoltán, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 53_000, mid: 58_000, upper: 63_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Régi szélvédő eltávolítása és felület-előkészítés',   amt: 10_000 },
+    { label:'Utángyártott szélvédő üveg (2011 Opel Astra)',        amt: 32_000 },
+    { label:'Beszerelés és tömítés, 1 éves beázás elleni garanciával', amt: 12_000 },
+    { label:'Végső tisztítás és porszívózás',                      amt:  4_000 },
+  ],
+  customer: {
+    'Name':'Zoltán Papp',
+    'Phone':'+36 30 555 0271',
+    'Email':'zoltan.papp@gmail.com',
+  },
+  timingShort: 'Aznap vagy másnap',
+  jobTags: ['2011-es Opel Astra, elterjedt szélvédőrepedés', 'Utángyártott üveg választása casco nélkül', 'Ingyenes parkolás és kényelmes váró', 'Csere utáni porszívózás', '1 év beázás elleni garancia'],
+  budget: { low: 50_000, high: 65_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Debrecen', clientZip: '4025',
+  companyCity: 'Debrecen', distanceMi: 4,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
