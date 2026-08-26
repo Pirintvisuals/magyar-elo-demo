@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Autóüveg Debrecen Kft. Real site copy
+       (autouvegdebrecen.com): 4002 Debrecen, Jégvirág utca 38, operating
+       since 1992, 30+ years experience, ISO 9001 certified, partner with
+       14+ major Hungarian insurers (Allianz, K&H, UNIQA, etc), full casco
+       claim administration handled for the customer, ADAS calibration
+       after glass replacement, wiper blade replacement as a real add-on
+       service, warranty on all work.
+       Second windscreen demo in the gallery after Glass Mechanix Dombóvár,
+       needed real differentiation, not just a reskin. That one is a solo
+       operator doing a small 30-minute chip repair for 5-15k Ft paid
+       out of pocket. This one is an established 30-year Kft whose real
+       headline differentiator is "teljes körű casco kárügyintézés", they
+       handle the entire insurance claim so the customer barely deals with
+       the insurer, and the job itself is a FULL windshield REPLACEMENT
+       (crack too long/positioned to repair) on a modern car with an ADAS
+       lane-assist camera that legally needs recalibrating after the glass
+       goes in, real technical detail specific to newer vehicles that the
+       Dombóvár demo's simple chip-repair scenario never touches.
+       Because casco covers most of the job, the estimate shown is
+       deliberately the CUSTOMER'S OUT-OF-POCKET total (deductible plus any
+       non-covered extras like wiper blades), not the full replacement
+       value the insurer pays the shop directly, first demo in the gallery
+       where the quoted number isn't the whole job cost. Framed explicitly
+       as an indicative estimate pending the actual policy's terms, not a
+       guarantee, since exact casco deductibles vary by policy and I have
+       no way to know this specific insurer's real terms.
+       Logo `autouveg-debrecen-logo.png`. white background, a stylised car
+       face with a blue windshield, azure blue "AUTÓÜVEG" wordmark, dark
+       charcoal grey car outline and "DEBRECEN KFT." subtext, sampled by
+       pixel (blue #008dd2, charcoal #434242). THEME pairs charcoal grey
+       rather than pure black with the sampled azure, a more corporate,
+       established read than Fintor's near-neon cyan-on-black urgent-callout
+       feel or Aqua System's lighter grey-blue.
+       Company, not solo, so the agent speaks in first person plural
+       throughout ("nálunk", "intézzük"), unlike the two solo-operator
+       demos (Csergő Szabolcs, Glass Mechanix Dombóvár).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. charcoal grey base, azure blue accent sampled from the logo.
+const THEME = {
+  bg:'#1a1d1f', dark:'#262a2d', mid:'#3a3f42', brand:'#008dd2', bright:'#3cb4f0',
+  dot:'#7ed0f7', chatBg:'#f2f9fd', tint:'#dcf0fb', tint2:'#eaf6fd', line:'#cfe8f7',
+  ink:'#3a3f42', inkSoft:'#008dd2', ring:'rgba(0,141,210,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Autóüveg Debrecen',
+    sub: 'Szélvédőcsere és javítás, teljes körű casco kárügyintézés',
+    tagline: 'Debrecen, 1992 óta, ISO 9001 tanúsított szerviz',
+    initial: 'A',
+    logoSrc: 'autouveg-debrecen-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőcsere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '10:21',
+  ownerBenefit: 'Rögzítve és minősítve 10:21-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült önrész összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült önrész',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédőd cseréjére vagy javítására?" },
+  { r:'user',  t:"Igen, nagyot kapott egy kő a szélvédőmön, és onnan egy hosszú repedés indult el" },
+  { r:'agent', t:"Ez sajnos már nem hangzik egyszerű javításnak. Nagyjából milyen hosszú a repedés, és merre halad rajta?" },
+  { r:'user',  t:"Vagy 30 centi, és keresztben megy a szélvédő közepén" },
+  { r:'agent', t:"Ekkora repedésnél, pláne ha a vezető látóterén is átmegy, már nem javítás, hanem csere kell, egy foltozott repedés ott biztonsági kockázat lenne. Van esetleg casco biztosításod a kocsira?" },
+  { r:'user',  t:"Igen, van casco, de nem tudom pontosan mit fedez" },
+  { r:'agent', t:"Ez esetben teljes körben intézzük a kárügyintézést helyetted, nem kell magadnak foglalkoznod a biztosítóval. Az üvegkár a legtöbb casco csomagban vagy önrész nélkül, vagy alacsony önrésszel van fedezve, ezt a szerződésed alapján pontosan megnézzük, mielőtt bármi elkezdődne. Milyen autótípusod van?" },
+  { r:'user',  t:"Egy 2021-es Skoda Octavia" },
+  { r:'agent', t:"Annál a modellnél gyakran van a szélvédőn kamera a sávtartó asszisztenshez. Van a tükör mögött egy kis fekete doboz vagy kamera a szélvédőre szerelve?" },
+  { r:'user',  t:"Igen, van ott egy kamera" },
+  { r:'agent', t:"Akkor a csere után kötelező azt újrakalibrálni, különben a vezetéstámogató rendszerek rosszul érzékelhetik a sávot. Ezt nálunk a csere részeként elvégezzük, külön oda-vissza utazás nélkül. Mikorra szeretnéd az időpontot?" },
+  { r:'user',  t:"Minél hamarabb, mert most nem merek vele autópályára menni" },
+  { r:'agent', t:"Azt jól is teszed ekkora repedéssel. Melyik városban vagy?" },
+  { r:'user',  t:"Debrecenben" },
+  { r:'agent', t:"Az remek, itt vagyunk a közelben. Nagyjából mennyi önrészre számítasz, ha esetleg lenne ilyen a biztosításodnál?" },
+  { r:'user',  t:"Nem tudom pontosan, talán 20 és 30 ezer forint közé" },
+  { r:'agent', t:"Ez reális egy ilyen kalibrációt igénylő cserénél, a szerződésed pontos feltételeit a kárbejelentéskor nézzük meg részletesen. Elkérhetem a neved?" },
+  { r:'user',  t:"Molnár Bettina" },
+  { r:'agent', t:"Köszönöm, Bettina. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0267" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"bettina.molnar@gmail.com" },
+  { r:'agent', t:"Köszönöm, Bettina, már el is kezdjük a kárügyintézést, és összeállítjuk a tájékoztató önrész-becslést." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 24_000, mid: 26_000, upper: 29_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Casco önrész, tájékoztató becslés a szerződés alapján', amt: 15_000 },
+    { label:'ADAS kamera újrakalibrálása csere után',               amt:  8_000 },
+    { label:'Ablaktörlő lapátok cseréje',                            amt:  3_000 },
+  ],
+  customer: {
+    'Name':'Bettina Molnár',
+    'Phone':'+36 20 555 0267',
+    'Email':'bettina.molnar@gmail.com',
+  },
+  timingShort: '1 napon belül',
+  jobTags: ['2021-es Skoda Octavia, 30 cm-es repedés a szélvédőn', 'Casco kárügyintézés teljes körben', 'ADAS kamera újrakalibrálása csere után', 'Ablaktörlő lapátok cseréje', 'ISO 9001 tanúsított szerviz, 1992 óta'],
+  budget: { low: 20_000, high: 30_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Debrecen', clientZip: '4024',
+  companyCity: 'Debrecen', distanceMi: 5,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
