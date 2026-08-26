@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Glass Master Győr (site also calls the owner
+       "Szélvédős Jani Győr"). Milan's message called this prospect "gyors
+       szelvedo javitas" but the logo badge reads "Glass Master", confirmed
+       by the real site (gyorszelvedojavitas.hu): Győr, Jereváni utca 42,
+       next to the LIDL, phone 06-20-616-7045, email
+       glassmastergyor@gmail.com. 12+ years experience, a proprietary
+       hybrid resin repair system, premium American/German repair
+       materials, free callout within Győr, open every day including
+       on-call Sundays, repairs as quick as 15 minutes for a simple chip.
+       No exact street address, city or phone was guessable from the
+       low-resolution logo alone (tried cropping/upscaling the badge's
+       small print, it stayed illegible), so the city and contact details
+       were confirmed from the user's own follow-up message and the real
+       site rather than invented.
+       Fourth windscreen-adjacent demo in the gallery, needed real
+       differentiation from all three others (Dombóvár's small chip
+       repair, both Debrecen full-replacement demos). This prospect's own
+       bio leads with a genuinely different service entirely, cosmetic
+       glass and headlight RESTORATION, not crack repair: wiper-blade and
+       ice-scraper scratches, haze, etching removal from glass, plus
+       fényszóró polírozás (headlight polishing) with a UV-protective
+       coating. Used headlight polishing as the main scenario since it is
+       not glass repair at all (restoring oxidised polycarbonate headlight
+       lenses), the most different job shape possible in this niche, and
+       folded in a windscreen scratch touch-up as a real add-on from the
+       same bio. The UV-coating-after-polish detail is genuine expertise:
+       cheap DIY polish kits skip it and the haze returns within months,
+       which is exactly why a professional visit is worth paying for.
+       Solo operator ("Szélvédős Jani"), so the agent speaks in first
+       person singular throughout, same treatment as Csergő Szabolcs and
+       Glass Mechanix Dombóvár.
+       Color note: the logo's dominant blue (#048aed) is the FOURTH nearly
+       identical vivid blue sampled from a Hungarian auto-glass logo in
+       this gallery (after Fintor, Autóüveg Debrecen, Autóüveg Centrum
+       Debrecen). Rather than add a fifth blue palette, THEME deliberately
+       leads with the badge's real secondary colour instead, the orange
+       wing accents (#f99b15), on a warm near-black base, a genuine colour
+       from the actual logo, just not the dominant one by pixel count.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. warm near-black base, vivid amber-orange accent sampled from the logo's wings.
+const THEME = {
+  bg:'#160a02', dark:'#2b1506', mid:'#4a2606', brand:'#f99b15', bright:'#ffb84d',
+  dot:'#ffd48a', chatBg:'#fff8ef', tint:'#ffe9cc', tint2:'#fff2e0', line:'#f5ddb8',
+  ink:'#4a2606', inkSoft:'#f99b15', ring:'rgba(249,155,21,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Glass Master Győr',
+    sub: 'Fényszóró polírozás, szélvédőjavítás és karcolás-eltüntetés',
+    tagline: 'Győr, a hét minden napján, 12+ év tapasztalattal',
+    initial: 'G',
+    logoSrc: 'glass-master-gyor-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'fényszóró polírozás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '18:47',
+  ownerBenefit: 'Rögzítve és minősítve 18:47-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a fényszóró polírozására?" },
+  { r:'user',  t:"Igen, a fényszóróim eléggé besárgultak, homályosan világítanak esténként" },
+  { r:'agent', t:"Ez nagyon gyakori pár éves autóknál, a fényszóró búra UV sugárzástól oxidálódik, és attól lesz sárgás, homályos. Milyen idős az autó, és mennyire súlyos a sárgulás?" },
+  { r:'user',  t:"6 éves, és elég erősen besárgult mindkét oldalon" },
+  { r:'agent', t:"Annyi idő alatt ez tipikus, főleg ha sokat áll a kocsi napon. A jó hír, hogy ez szinte mindig polírozással megoldható, nem kell hozzá cserélni a búrát. Próbáltál már valamilyen boltban kapható fényszórópolírozó készletet?" },
+  { r:'user',  t:"Próbáltam egy olcsó készletet, de pár hónap múlva megint homályos lett" },
+  { r:'agent', t:"Ez a leggyakoribb hiba az ilyen házi készleteknél, csiszolnak, de nem visznek fel utána UV-védelmet, úgyhogy pár hónap alatt visszasárgul. Nálam a polírozás után egy tartós UV-védő bevonatot is felviszek, arra garanciát is adok, az tartja hosszabb távon fényesen és tisztán. Csak a fényszórókkal van gond, vagy a szélvédőn is van valami karcolás, homályosodás?" },
+  { r:'user',  t:"A szélvédőn is van pár apró karc, valószínűleg a jégkaparótól" },
+  { r:'agent', t:"Azt is meg tudom oldani ugyanazon a látogatáson, a jégkaparó- és ablaktörlő-karcokat polírozással el lehet tüntetni, ha nem mennek túl mélyre az üvegbe. Mikor érnél rá?" },
+  { r:'user',  t:"Ezen a héten bármikor jó lenne" },
+  { r:'agent', t:"Az simán belefér, a hét minden napján dolgozom, vasárnap is hívásra. Egy ilyen munka jellemzően 30-45 perc. Melyik városban vagy?" },
+  { r:'user',  t:"Győrben" },
+  { r:'agent', t:"Az remek, itt vagyok a Lidl parkolónál, könnyen megközelíthető. Nagyjából milyen összeggel számoltál a kettőre együtt?" },
+  { r:'user',  t:"15 és 25 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez reális, a fényszóró polírozás UV-védelemmel és a szélvédőkarcok eltüntetése együtt jellemzően ebbe a sávba esik. Elkérhetem a neved?" },
+  { r:'user',  t:"Szabó Anett" },
+  { r:'agent', t:"Köszönöm, Anett. Milyen számon érlek el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0284" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"anett.szabo@gmail.com" },
+  { r:'agent', t:"Köszönöm, Anett, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 18_000, mid: 20_000, upper: 23_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Fényszóró polírozás mindkét oldalon',              amt: 10_000 },
+    { label:'UV-védő bevonat felvitele garanciával',            amt:  6_000 },
+    { label:'Szélvédőkarcok polírozása, jégkaparó és ablaktörlő nyomok', amt: 4_000 },
+  ],
+  customer: {
+    'Name':'Anett Szabó',
+    'Phone':'+36 30 555 0284',
+    'Email':'anett.szabo@gmail.com',
+  },
+  timingShort: '30-45 perc',
+  jobTags: ['6 éves autó, besárgult fényszórók', 'Fényszóró polírozás UV-védő bevonattal', 'Jégkaparó és ablaktörlő karcok eltüntetése a szélvédőről', 'Garancia a bevonatra', 'A hét minden napján elérhető'],
+  budget: { low: 15_000, high: 25_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Győr', clientZip: '9024',
+  companyCity: 'Győr', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
