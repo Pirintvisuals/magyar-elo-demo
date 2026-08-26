@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Szélvédőjavítás Kecskemét. Real site copy
+       (szelvedojavitaskecso.hu): Kecskemét, Talfája tanya 1, customer
+       pickup at three named parking lots (Auchan, Kis Tesco, Nagy Tesco) or
+       free mobile service, 20+ years experience, completion "akár 15 perc
+       alatt", 7 days a week extended hours. Real published pricing with an
+       actual formula, not just a band: kőfelverődés javítás from 17,500 Ft,
+       repedésjavítás from 20,000 Ft PLUS 500 Ft per centimeter of crack
+       length. First demo in the gallery built around a literal computable
+       pricing formula rather than a qualitative estimate, the scenario
+       uses a 12 cm crack and the agent walks through the exact math
+       (20,000 + 12 x 500 = 26,000) live in the dialogue, real domain
+       precision no other demo has shown.
+       Fifth windscreen-adjacent demo in the gallery (after Glass Mechanix
+       Dombóvár, Autóüveg Debrecen, Autóüveg Centrum Debrecen, Glass Master
+       Győr), differentiated by the exact pricing formula and by the named
+       multi-location pickup choice (Auchan / Kis Tesco / Nagy Tesco
+       parkoló) instead of the usual simple mobile-vs-workshop binary.
+       Logo is a plain black line-art windscreen icon on white, no colour
+       to sample at all (same situation as Szakszig, Kozák, Házrehab).
+       THEME is a fresh thematic pick, not pixel-sampled: lime green on
+       dark charcoal, an "efficiency/speed" palette matching the real
+       15-minute completion claim, and a hue nothing else in the gallery
+       uses as its primary brand colour, deliberately not another blue
+       given how saturated blue already is across the other four
+       windscreen demos.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. dark charcoal-green base, vivid lime accent, a fresh thematic choice (logo has no colour to sample).
+const THEME = {
+  bg:'#0f1410', dark:'#1c2419', mid:'#2c3a24', brand:'#8bc926', bright:'#b3e858',
+  dot:'#d4f28c', chatBg:'#f7fbef', tint:'#e8f5d2', tint2:'#f0f8e2', line:'#dcecc0',
+  ink:'#2c3a24', inkSoft:'#8bc926', ring:'rgba(139,201,38,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Szélvédőjavítás Kecskemét',
+    sub: 'Kőfelverődés és repedésjavítás, akár 15 perc alatt',
+    tagline: 'Kecskemét, a hét minden napján, 20+ év tapasztalattal',
+    initial: 'S',
+    logoSrc: 'szelvedojavitas-kecskemet-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '12:58',
+  ownerBenefit: 'Rögzítve és minősítve 12:58-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédőd javítására?" },
+  { r:'user',  t:"Igen, egy kő eltalálta a szélvédőmet, és onnan egy repedés indult el" },
+  { r:'agent', t:"Mekkora most a repedés, és mióta van rajta?" },
+  { r:'user',  t:"Kábé egy hete keletkezett, és azóta már vagy 12 centis" },
+  { r:'agent', t:"Azt még simán meg tudjuk oldani javítással, nem kell miatta cserélni. Nálunk a repedésjavítás ára 20 000 forinttól indul, plusz 500 forint minden centiméter után, tehát egy 12 centis repedésnél ez 20 000 meg 12-szer 500, vagyis 26 000 forint körül alakul. Hol helyezkedik el a szélvédőn, a vezető közvetlen látóterében van?" },
+  { r:'user',  t:"Nem, inkább a bal szélén fut végig" },
+  { r:'agent', t:"Az jó hír, ott simán javítható. Szoktunk dolgozni az Auchan, a Kis Tesco és a Nagy Tesco parkolójában is, vagy ha jobban jönne, díjmentesen ki is megyünk hozzád. Melyik lenne a legkényelmesebb?" },
+  { r:'user',  t:"A Nagy Tesco parkolója közel esik hozzám, az jó lenne" },
+  { r:'agent', t:"Rendben, ott szoktunk dolgozni rendszeresen. Egy ilyen javítás jellemzően 15 perc alatt kész, szóval nem kell sokáig várakoznod. Mikor érnél rá?" },
+  { r:'user',  t:"Holnap délután jó lenne" },
+  { r:'agent', t:"Az belefér, a hét minden napján dolgozunk, hosszabb nyitvatartással. Melyik városban laksz?" },
+  { r:'user',  t:"Kecskeméten" },
+  { r:'agent', t:"Az remek, akkor semmilyen extra utat nem kell tenned. Nagyjából milyen összeggel számoltál a javításra?" },
+  { r:'user',  t:"20 és 30 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez pontosan stimmel, a 12 centis repedésnél kiszámolt 26 000 forint pont ebbe a sávba esik. Elkérhetem a neved?" },
+  { r:'user',  t:"Kiss Beáta" },
+  { r:'agent', t:"Köszönöm, Beáta. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0295" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"beata.kiss@gmail.com" },
+  { r:'agent', t:"Köszönöm, Beáta, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 25_000, mid: 26_000, upper: 27_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Alapdíj, helyszíni javítás (20 000 Ft-tól induló alapár)', amt: 20_000 },
+    { label:'Repedéshossz szerinti pótdíj (12 cm, 500 Ft/cm)',          amt:  6_000 },
+  ],
+  customer: {
+    'Name':'Beáta Kiss',
+    'Phone':'+36 20 555 0295',
+    'Email':'beata.kiss@gmail.com',
+  },
+  timingShort: '15 perc',
+  jobTags: ['12 cm-es repedés a szélvédő bal szélén', 'Ár számítva: 20 000 Ft alapdíj + 500 Ft/cm', 'Nagy Tesco parkolójában javítva', 'Nem a vezető látóterében', '15 perc alatt kész'],
+  budget: { low: 20_000, high: 30_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Kecskemét', clientZip: '6000',
+  companyCity: 'Kecskemét', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
