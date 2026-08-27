@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Szélvédő javítás Dunaújváros. Owner Rasztovits Ottó,
+       found via web search since no site was given, only a photo of the
+       physical roadside banner and a phone number: nearly 30 years doing
+       windscreen repair and 15 years doing headlight polishing, based at
+       the Tesco parking lot in Dunaújváros (2400), phone +36 70 635 4652.
+       No fixed price list exists, real detail confirmed by search results,
+       pricing depends on damage severity/size/position and is quoted after
+       an on-site look, unlike Kecskemét's exact formula or Dombóvár's
+       published band, so the dialogue never states a number until the
+       usual end-of-flow budget question, consistent with how every
+       non-formula demo in the gallery handles it.
+       Sixth windscreen-adjacent demo in the gallery. Needed real
+       differentiation from the two solo demos already covering similar
+       ground: Glass Master Győr leads with headlight polishing (12+
+       years) and folds in scratch repair as a secondary beat; this one
+       leads with the owner's actual PRIMARY specialty, windscreen chip and
+       crack repair (his ~30 years vs 15 years on lamps), and uses a star-
+       shaped break (csillag alakú kőfelverődés) rather than the simple
+       round chip or long crack every other demo has already used, plus
+       the real detail that the resin restores the glass's structural
+       integrity, not just its appearance. Kept it to windscreen repair
+       only rather than also folding in lamp polishing, since Győr already
+       covers that combo and repeating it here would read as a reskin.
+       Logo is a photo of a real weathered roadside banner (not a clean
+       vector mark), so its colours are muted by actual outdoor lighting:
+       brick red and dusty mustard yellow rather than vivid tones, sampled
+       by pixel (red #aa4044, mustard #b8a13b). Two other demos already use
+       vivid red (Tetőfedés Szaki, Glass Mechanix Dombóvár), so THEME leads
+       with the mustard yellow instead on a warm dark brown-black base,
+       avoiding a third red and reading as an aged, hand-painted sign
+       rather than a clean digital brand, distinct from Gáz-Lak's more
+       saturated golden-excavator yellow too.
+       Solo operator, so the agent speaks in first person singular
+       throughout (fecskendezek, dolgozom, érlek el), same treatment as
+       Csergő Szabolcs, Glass Mechanix Dombóvár and Glass Master Győr.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. warm dark brown-black base, dusty mustard accent sampled from the weathered banner photo.
+const THEME = {
+  bg:'#1a1210', dark:'#2b1f1a', mid:'#4a352a', brand:'#b8a13b', bright:'#d4bd5c',
+  dot:'#e8d68f', chatBg:'#fbf8ee', tint:'#f3ecd0', tint2:'#f8f3e0', line:'#ecdfc0',
+  ink:'#4a352a', inkSoft:'#b8a13b', ring:'rgba(184,161,59,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Szélvédő javítás Dunaújváros',
+    sub: 'Kőfelverődés és repedésjavítás, Rasztovits Ottó',
+    tagline: 'Dunaújváros, Tesco parkoló, közel 30 év tapasztalattal',
+    initial: 'S',
+    logoSrc: 'szelvedo-dunaujvaros-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'szélvédőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '15:33',
+  ownerBenefit: 'Rögzítve és minősítve 15:33-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédő javítására?" },
+  { r:'user',  t:"Igen, egy kő eltalálta a szélvédőmet, és egy csillag alakú törés keletkezett rajta" },
+  { r:'agent', t:"Azok elég gyakoriak, jó eséllyel javítható. Nagyjából mekkora a törés, és hány ága van?" },
+  { r:'user',  t:"Olyan 3-4 kisebb ága van, de egyik sem hosszú, talán 2-3 centisek" },
+  { r:'agent', t:"Az még ideális eset javításra. Egy speciális gyantát fecskendezek a törésbe, ami visszaadja az üveg szerkezeti szilárdságát is, nem csak szemre tünteti el. Hol van a szélvédőn, a vezető közvetlen látóterében?" },
+  { r:'user',  t:"Nem, kicsit jobbra a közepétől" },
+  { r:'agent', t:"Az jó hír, ott simán javítható. Mivel minden sérülés kicsit más, a pontos árat mindig a helyszíni felmérés után szoktam megmondani, számít a méret, a súlyosság és hogy hol helyezkedik el. Mikor érnél rá?" },
+  { r:'user',  t:"Minél hamarabb, félek, hogy tovább repedne" },
+  { r:'agent', t:"Jól teszed, hogy most foglalkozol vele, egy csillagtörés hidegben vagy rázkódásra könnyen tovább futhat. A javítás jellemzően 30-60 perc, a Tesco parkolójában szoktam dolgozni, oda be tudsz jönni?" },
+  { r:'user',  t:"Igen, az megoldható" },
+  { r:'agent', t:"Az remek. Melyik városban vagy?" },
+  { r:'user',  t:"Dunaújvárosban" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál a javításra?" },
+  { r:'user',  t:"10 és 20 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez pont beleillik abba, amit egy ekkora, néhány rövid ágú csillagsérülésnél szoktam kérni. Elkérhetem a neved?" },
+  { r:'user',  t:"Kovács Dániel" },
+  { r:'agent', t:"Köszönöm, Dániel. Milyen számon érlek el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0309" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"daniel.kovacs@gmail.com" },
+  { r:'agent', t:"Köszönöm, Dániel, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 13_000, mid: 15_000, upper: 17_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés és sérülés tisztítása',            amt:  3_000 },
+    { label:'Gyantás javítás, csillagtörés (3-4 rövid ág)',         amt: 10_000 },
+    { label:'UV-kikeményítés és polírozás',                         amt:  2_000 },
+  ],
+  customer: {
+    'Name':'Dániel Kovács',
+    'Phone':'+36 30 555 0309',
+    'Email':'daniel.kovacs@gmail.com',
+  },
+  timingShort: '30-60 perc',
+  jobTags: ['Csillag alakú kőfelverődés, 3-4 rövid ág', 'Nem a vezető közvetlen látóterében', 'Speciális gyantás javítás, szerkezeti szilárdság-helyreállítás', 'Tesco parkolójában javítva', 'Közel 30 éves szélvédőjavítási tapasztalat'],
+  budget: { low: 10_000, high: 20_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Dunaújváros', clientZip: '2400',
+  companyCity: 'Dunaújváros', distanceMi: 2,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
