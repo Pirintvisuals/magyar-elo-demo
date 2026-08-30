@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. BertaGarden (BERTA-GARDEN Kft.), Szeged, serving
+       Bács-Kiskun, Békés and Csongrád-Csanád counties too. Real site copy
+       (bertagarden.hu): 10+ years experience, free site survey, a
+       published 7-step öntözőrendszer install process (survey, design
+       plan with costs/timeline, trenching, water-source connection,
+       electric valve/zone assembly, backfill+programming, handover with
+       usage training), warranty on every complete system they design,
+       typical install 1-2 days for a normal garden. Real technical USPs
+       used as the expertise beats: WiFi/app control, a rain sensor that
+       skips watering after real rain, early-morning timing to cut summer
+       evaporation loss by "up to 50%" (their own stated figure), and
+       rainwater-harvesting/cistern integration as an alternative water
+       source to mains or a well.
+       Requested specifically as an "öntözőrendszer kalkulátor" (irrigation
+       calculator), not a general garden build, so unlike Kertkozmetika
+       (full from-scratch garden, sod+patio+irrigation+hedge as one of
+       several line items) this demo goes deep on irrigation alone: an
+       EXISTING garden getting a system retrofitted (well as the water
+       source, a real option their own site lists alongside mains/cistern),
+       not a new-build plot, and every real USP above gets its own beat in
+       the dialogue instead of being one bullet among many.
+       Logo file supplied was `bertagarden-logo-feher.svg`, a white-fill
+       wordmark ("feher" = white), meant for a dark surface. The engine's
+       logo-wrap has a solid white background (quote-agent.css), so a
+       white-on-white mark would be invisible. Made a visible copy
+       (`bertagarden-logo.svg`) with the fill swapped to their real sampled
+       brand colour instead of inventing a new one: #4a543d, read directly
+       off the live site's own CTA button background via computed style,
+       not guessed.
+       Colour note: that olive green sampled almost exactly the same hue
+       and lightness as Házrehab Bau's existing palette (#3d4a2a/#5c6e3a).
+       Rather than force a different green that wouldn't match their real
+       brand, THEME keeps the real olive for the base/majority tones but
+       adds a genuine differentiator Házrehab's palette doesn't have: a
+       water-blue accent (#5ec2d6) used specifically for the pulse dot and
+       the focus ring, a deliberate "irrigation" cue neither present nor
+       thematically appropriate in Házrehab's exterior-insulation demo.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. real olive green base (sampled from their live site's button colour), water-blue accent for differentiation.
+const THEME = {
+  bg:'#12160e', dark:'#232a19', mid:'#3d4530', brand:'#4a543d', bright:'#7c9463',
+  dot:'#5ec2d6', chatBg:'#f6f8f1', tint:'#e8efdd', tint2:'#eff4e6', line:'#dde8cc',
+  ink:'#3d4530', inkSoft:'#4a543d', ring:'rgba(94,194,214,0.35)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'BertaGarden',
+    sub: 'Öntözőrendszer tervezés és telepítés',
+    tagline: 'Szeged és térsége, 10+ év tapasztalattal',
+    initial: 'B',
+    logoSrc: 'bertagarden-logo.svg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'öntözőrendszer',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '17:26',
+  ownerBenefit: 'Rögzítve és minősítve 17:26-kor, miközben te épp egy másik munkán voltál. Reggel egy induláskész érdeklődőre ébredsz.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni öntözőrendszer telepítésére?" },
+  { r:'user',  t:"Igen, elegünk van a locsolásból, mindig mi felejtjük el, vagy rossz időben csináljuk" },
+  { r:'agent', t:"Ez nagyon gyakori indíték, egy automata rendszer pont ezt oldja meg. Nagyjából mekkora a kert, amit locsolni kellene?" },
+  { r:'user',  t:"Körülbelül 350 négyzetméter, gyep és néhány ágyás vegyesen" },
+  { r:'agent', t:"Rendben, 350 m². Mi a vízforrás nálatok, hálózati csap, vagy van esetleg kút vagy esővízgyűjtő tartály?" },
+  { r:'user',  t:"Van egy kutunk a kertben, azt használjuk locsolásra is" },
+  { r:'agent', t:"Az kifejezetten jó, kúttal olcsóbb az üzemeltetés, mint hálózati vízzel. A rendszert rá tudjuk kötni a kútra, a nyomás és a hozam alapján osztjuk fel zónákra a kertet. Gondoltál már arra, hogy WiFi-s, appból vezérelhető rendszert szeretnél, vagy elég egy egyszerű időzítős vezérlő?" },
+  { r:'user',  t:"A WiFi-s jobban tetszik, hogy telefonról is tudjam állítani" },
+  { r:'agent', t:"Az praktikus, útról is át tudod állítani, ha éppen esik, vagy ha elutazol. Esőszenzort is szoktunk vele építeni, ami automatikusan kihagyja az öntözést, ha nemrég esett, így nem locsolsz feleslegesen vizes talajba. A rendszert kora reggeli locsolásra időzítjük be, mert nyáron akár 50%-kal is csökkenti a párolgási veszteséget, mintha napközben locsolnátok. Mikorra szeretnétek, hogy elkészüljön?" },
+  { r:'user',  t:"Még ezen a tavaszon jó lenne, mielőtt beindul a meleg" },
+  { r:'agent', t:"Az belefér, egy ekkora kertnél jellemzően 1-2 nap alatt végzünk, a tervezéstől a betanításig. Melyik településen van a kert?" },
+  { r:'user',  t:"Szegeden" },
+  { r:'agent', t:"Az remek, itt vagyunk a közelben. Nagyjából milyen büdzsével számoltatok?" },
+  { r:'user',  t:"300 és 400 ezer forint között gondoltuk" },
+  { r:'agent', t:"Ez reális erre a méretre, a WiFi-s vezérléssel és az esőszenzorral együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Németh Orsolya" },
+  { r:'agent', t:"Köszönöm, Orsolya. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0317" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"orsolya.nemeth@gmail.com" },
+  { r:'agent', t:"Köszönöm, Orsolya, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 320_000, mid: 350_000, upper: 380_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni felmérés és kiviteli terv',                     amt:  25_000 },
+    { label:'Árkok kiásása és kútra kötés (350 m²)',                   amt:  90_000 },
+    { label:'Öntözőfejek és csepegtető rendszer zónánként',            amt: 130_000 },
+    { label:'WiFi-s vezérlő és esőszenzor telepítése',                 amt:  65_000 },
+    { label:'Visszatöltés, programozás és betanítás',                  amt:  40_000 },
+  ],
+  customer: {
+    'Name':'Orsolya Németh',
+    'Phone':'+36 30 555 0317',
+    'Email':'orsolya.nemeth@gmail.com',
+  },
+  timingShort: '1-2 nap',
+  jobTags: ['350 m²-es kert, gyep és ágyások', 'Kútra kötött öntözőrendszer', 'WiFi-s, telefonról vezérelhető', 'Esőszenzorral, felesleges locsolás nélkül', 'Kora reggeli időzítés, akár 50% párolgás-megtakarítás'],
+  budget: { low: 300_000, high: 400_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Szeged', clientZip: '6724',
+  companyCity: 'Szeged', distanceMi: 5,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
