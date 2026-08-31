@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Pelcz Autóüveg Kft., Diósi út 14., Pécs 7630.
+       Real detail pulled from their own site pelczautouveg.hu, not just the
+       lead sheet: 30 years in business, their own tagline "Szélvédő gondja
+       megoldva!", the promise "minőségi szolgáltatás, gyári technológia,
+       ügyfélbarát megoldások", 10 year warranty on chip repairs, official
+       casco kárfelvevő hely for eleven named insurers (K&H, Gránit, Allianz,
+       Generali, Alfa, Signal Iduna, Groupama, Uniqa, Union, Köbe, Porsche),
+       4,8 csillag / 205 Google értékelés, and the service line that matters
+       most here: they do TRUCK windscreens and mirror replacement, not just
+       passenger cars. Phone (72) 516-850 / 06 70 256 5660,
+       info@pelczautouveg.hu.
+       Seventh windscreen demo in the gallery, so the job shape had to be
+       genuinely new rather than a reskin. Every prior one is a passenger
+       car: Kecskemét and Dombóvár and Dunaújváros do chip/crack resin
+       repair, Győr leads with headlight polishing, Autóüveg Debrecen does a
+       casco-funded car windscreen swap, Autóüveg Centrum Debrecen does a
+       self-funded aftermarket car windscreen swap. This one is a
+       HASZONGÉPJÁRMŰ job, a 2018 MAN TGL 12.220 with a 60 cm crack, plus a
+       mirror glass swap on the same visit. That is the first commercial
+       vehicle in either gallery and it changes the customer's actual pain
+       from cosmetics to downtime, which is the "sell time back" beat.
+       Deliberately made him DECLINE the casco route (glass önrész plus
+       bonus loss is not worth it on a work truck, a real haulier's
+       reasoning) so the itemised quote is real glass plus labour rather
+       than a repeat of Autóüveg Debrecen's önrész estimate. Their casco
+       credential still lands, because the agent offers it and names the
+       eleven-insurer claims centre before he turns it down.
+       The 10 year warranty is stated only where it is true, on chip repair,
+       and this is a replacement, so the agent cites the 30 years and the
+       gyári technológia instead. Nothing about ADAS calibration is claimed,
+       their site does not mention it.
+       Logo is a flat sky-blue square with a white glass mark, sampled by
+       pixel: bg #38a8f2, wordmark navy #204c73, mark highlight #a1d7fd.
+       Two Debrecen demos already sit in blue (#008dd2 and #01a0e2) on
+       near-neutral dark bases, so THEME keeps the brand-true lighter sky
+       blue but puts it on the logo's OWN deep navy rather than a neutral
+       charcoal, which reads as a distinctly cooler, bluer demo next to
+       those two instead of a third grey-and-blue near-duplicate.
+       Company with staff, so the agent speaks first person plural
+       (cserélünk, kiadjuk, csináljuk), unlike the solo-operator demos.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. deep navy base from the logo wordmark, sky blue accent from the logo field.
+const THEME = {
+  bg:'#081422', dark:'#0f2438', mid:'#204c73', brand:'#38a8f2', bright:'#6cc2fb',
+  dot:'#a1d7fd', chatBg:'#f4fafe', tint:'#dceffc', tint2:'#eaf6fe', line:'#cde5f7',
+  ink:'#204c73', inkSoft:'#38a8f2', ring:'rgba(56,168,242,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Pelcz Autóüveg',
+    sub: 'Szélvédőcsere, javítás és casco kárügyintézés, tehergépjárműre is',
+    tagline: 'Szélvédő gondja megoldva! Pécs, Diósi út 14., 30 éve',
+    initial: 'P',
+    logoSrc: 'pelcz-autouveg-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőcsere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '06:48',
+  ownerBenefit: 'Rögzítve és minősítve 06:48-kor, még nyitás előtt. Mire kinyitjátok a műhelyt, egy induláskész érdeklődő vár, típussal és időponttal együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni szélvédőcserére vagy javításra?" },
+  { r:'user',  t:"Cserére lesz szükség. A tehergépkocsim szélvédőjét megvágta egy kavics az M6-oson" },
+  { r:'agent', t:"Értem, tehergépjármű szélvédőt is cserélünk, arra is megvan a beszállítói hátterünk. Milyen típus és évjárat?" },
+  { r:'user',  t:"2018-as MAN TGL 12.220" },
+  { r:'agent', t:"Köszönöm. Mekkora a repedés, és merre fut rajta?" },
+  { r:'user',  t:"Már úgy 60 centi, a vezető oldalán indult és keresztben húzódik" },
+  { r:'agent', t:"Ekkora repedésnél a gyantás javítás már nem opció, ott csere kell, a vezető látóterében ráadásul a műszakin sem menne át. Van casco a járművön?" },
+  { r:'user',  t:"Van, de az üvegkár önrésze és a bónusz miatt inkább kifizetném" },
+  { r:'agent', t:"Teljesen érthető, sok fuvarozó így dönt. Ha mégis meggondolnád, hivatalos casco kárfelvevő hely vagyunk tizenegy biztosítónál, a papírmunkát nálunk helyben elintézzük. Addig sima, számlás cserével számolunk." },
+  { r:'user',  t:"Így jó lesz. Illetve a jobb oldali tükör lapja is megrepedt, azt is meg tudjátok csinálni?" },
+  { r:'agent', t:"Meg, tükörcserét is vállalunk, egy behozatallal megvan a kettő. Mikorra kellene?" },
+  { r:'user',  t:"Minél hamarabb, mert amíg áll, addig nem termel" },
+  { r:'agent', t:"Ezt ismerjük, nálunk a legtöbb haszonjármű aznap kimegy. Ha reggel behozod, a csere maga 3-4 óra, utána a ragasztó kötési ideje miatt még kell nálunk hagyni nagyjából egy órát, és mehetsz vele." },
+  { r:'user',  t:"Az belefér. A telephely hol van pontosan?" },
+  { r:'agent', t:"Diósi út 14., Pécs. Teherautóval is jól be lehet állni hozzánk, nem kell manőverezni az utcán." },
+  { r:'user',  t:"Rendben" },
+  { r:'agent', t:"Melyik városban vagy?" },
+  { r:'user',  t:"Kozármislenyben, onnan járok be" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál a cserére?" },
+  { r:'user',  t:"130 és 170 ezer közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora haszongépjármű szélvédőjére. 30 éve csináljuk és gyári technológiával dolgozunk, úgyhogy a beépítés miatt nem kell aggódnod. Elkérhetem a neved?" },
+  { r:'user',  t:"Takács Gábor" },
+  { r:'agent', t:"Köszönöm, Gábor. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0318" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"gabor.takacs@gmail.com" },
+  { r:'agent', t:"Köszönöm, Gábor, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 138_000, mid: 150_000, upper: 165_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Régi szélvédő kibontása, keret tisztítása és rozsdaellenőrzés', amt: 18_000 },
+    { label:'Tehergépjármű szélvédő üveg (2018 MAN TGL 12.220)',            amt: 78_000 },
+    { label:'Beépítés poliuretán ragasztással, gyári technológiával',        amt: 32_000 },
+    { label:'Jobb oldali visszapillantó tükörlap cseréje',                   amt: 22_000 },
+  ],
+  customer: {
+    'Name':'Gábor Takács',
+    'Phone':'+36 30 555 0318',
+    'Email':'gabor.takacs@gmail.com',
+  },
+  timingShort: 'Aznap, 3-4 óra',
+  jobTags: ['2018-as MAN TGL 12.220, kb 60 cm-es repedés', 'Csere, javítás már nem opció a vezető látóterében', 'Jobb oldali tükörlap cseréje ugyanazon a behozatalon', 'Számlás fizetés, casco kárfelvételt nem kér', 'Aznapi kiadás, hogy a jármű ne álljon'],
+  budget: { low: 130_000, high: 170_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Kozármisleny', clientZip: '7761',
+  companyCity: 'Pécs', distanceMi: 11,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
