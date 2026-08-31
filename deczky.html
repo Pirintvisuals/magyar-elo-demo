@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. DECZKY Kft., székhely Bezenye, levelezési cím
+       Mosonmagyaróvár (Fészek utca 32.), owner Deczky Zoltán, tel
+       +36-30/262-9157, email deczkyz@gmail.com. Real detail pulled from
+       their own About text (pasted directly by the prospect) plus their
+       site deczky.hu: fő profil ács, tetőfedő és bádogos, "szakmai
+       hozzáértéssel, korszerű gépekkel, szerszámokkal", kiemelt figyelem a
+       minőségi faanyagra, ingyenes helyszíni felmérés, többféle megoldás
+       vázolva a megrendelő anyagi lehetőségeihez igazítva. Site also lists
+       new tetőszerkezet building, tetőfelújítás, cserépfedés,
+       bitumenzsindely fedés, hőszigetelés, gipszkartonozás, faburkolat,
+       bádogos munkák és fa értékesítés, present in the market since 2014
+       per search results. Site is bilingual HU/DE (Bezenye sits right on
+       the Austrian border near Rajka/Hegyeshalom).
+       Logo pulled straight from their own site (deczky.hu/images/logo.gif,
+       a real wordmark, not a flyer scan): mid-grey background #666666, a
+       white/orange house-roof glyph, "DECZ" in grey-white and "KY" in
+       amber #f8b334.
+       Note for Milan, not for the demo: the site's raw HTML has an
+       injected <script src="hfbakhsh.com/logs/errorr.php"> tag, a sign the
+       site has been compromised. Worth mentioning as the "couple of
+       things worth fixing" outreach line for this prospect specifically,
+       it's a real, checkable issue, not a generic claim.
+       Fourth roofing-family demo, so the job shape needed real separation
+       from the other three: Keszthelyi Tető (full pitched-tile teardown
+       and replacement), Tetőfedés Szaki (flat garage roof, bitumen
+       membrane to EPDM), Kozák (palatető overlaid without demolition).
+       This one leans on DECZKY's own emphasized trade, ács, and its own
+       listed material, bitumenzsindely, for something none of the others
+       are: a brand NEW timber roof structure (not a repair or
+       recovering) on a garden building, built and covered in one job,
+       plus a small gutter run. Uses their real "quality timber" and
+       "multiple options by budget" lines as genuine beats rather than
+       generic ones.
+       THEME keeps the logo's own grey and amber but on a neutral
+       true-grey-black base rather than a warm brown-black, since Győr's
+       headlight-polish demo already owns warm-brown-black plus orange,
+       and this logo's own bg really is neutral grey rather than warm.
+       Kft. with an owner but no stated headcount; kept to first person
+       plural like the other Kft-branded demos.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. neutral grey-black base, amber accent from the real site logo.
+const THEME = {
+  bg:'#141414', dark:'#242424', mid:'#3d3d3d', brand:'#f8b334', bright:'#facd6a',
+  dot:'#fde3a3', chatBg:'#fffaf0', tint:'#fbe9c6', tint2:'#fdf3dd', line:'#f0ddb0',
+  ink:'#3d3d3d', inkSoft:'#f8b334', ring:'rgba(248,179,52,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'DECZKY Kft.',
+    sub: 'Ács, tetőfedő és bádogos munkák, minőségi faanyagokból',
+    tagline: 'Mosonmagyaróvár és környéke, 2014 óta',
+    initial: 'D',
+    logoSrc: 'deczky-logo.gif',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'tetőfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '18:04',
+  ownerBenefit: 'Rögzítve és minősítve 18:04-kor, miközben épp egy másik munkán voltatok. Reggel egy induláskész érdeklődőre ébredtek, típussal és részletekkel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Üdvözlöm! Szeretne árajánlatot kérni tetőmunkára?" },
+  { r:'user',  t:"Igen, egy kerti pihenőházra kellene teljesen új tető, alapoktól" },
+  { r:'agent', t:"Rendben, egy új ácsszerkezetről beszélünk. Mekkora a ház alapterülete, és milyen tetőformát képzelt el?" },
+  { r:'user',  t:"Kb 20 nm, egyszerű nyeregtetőt szeretnék rá" },
+  { r:'agent', t:"Az egy jól kivitelezhető méret. Minőségi faanyagból építjük meg a szarufaszerkezetet, milyen fedést szeretne rá, cserepet vagy bitumenzsindelyt?" },
+  { r:'user',  t:"Azt hallottam, hogy bitumenzsindely olcsóbb egy ekkora épületre" },
+  { r:'agent', t:"Igen, kisebb épületnél gyakran ez a jobb választás, könnyebb a szerkezetnek is, és sokféle színben elérhető. A helyszíni felmérés után pár megoldást felvázolunk, hogy a keretéhez igazítsuk." },
+  { r:'user',  t:"Az jó lenne, mert nem tudom pontosan mennyit szánjak rá" },
+  { r:'agent', t:"Semmi gond, ez a felmérésnél tisztázódik. Ereszcsatornát is szeretne rá, hogy legyen hova elvezetni a vizet?" },
+  { r:'user',  t:"Igen, azt is kérnék" },
+  { r:'agent', t:"Rendben, azt is bekalkuláljuk. Mikorra kellene elkészülnie?" },
+  { r:'user',  t:"Az ősz beállta előtt szeretném, szóval van még pár hetünk" },
+  { r:'agent', t:"Az belefér, egy ekkora szerkezet és fedés jellemzően 3-4 munkanap. Melyik városban van?" },
+  { r:'user',  t:"Rajkán" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt az egészre?" },
+  { r:'user',  t:"850 ezer és 1,1 millió forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora új szerkezetre a bitumenzsindellyel és az ereszcsatornával együtt. Elkérhetem a nevét?" },
+  { r:'user',  t:"Varga Kristóf" },
+  { r:'agent', t:"Köszönöm, Kristóf. Milyen számon érjük el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0364" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"kristof.varga@gmail.com" },
+  { r:'agent', t:"Köszönöm, Kristóf, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 880_000, mid: 950_000, upper: 1_050_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Új ácsszerkezet, nyeregtető (kb 20 nm)',      amt: 450_000 },
+    { label:'Bitumenzsindely fedés',                        amt: 350_000 },
+    { label:'Ereszcsatorna kiépítése',                      amt: 150_000 },
+  ],
+  customer: {
+    'Name':'Kristóf Varga',
+    'Phone':'+36 20 555 0364',
+    'Email':'kristof.varga@gmail.com',
+  },
+  timingShort: '3-4 munkanap',
+  jobTags: ['Kerti pihenőház, kb 20 nm, alapoktól új tető', 'Minőségi faanyagból épített ácsszerkezet', 'Bitumenzsindely fedés', 'Ereszcsatorna kiépítése', 'Ingyenes helyszíni felmérés, keretre szabott megoldások'],
+  budget: { low: 850_000, high: 1_100_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Rajka', clientZip: '9224',
+  companyCity: 'Mosonmagyaróvár', distanceMi: 12,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
