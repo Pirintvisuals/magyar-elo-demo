@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Hírös Szerviz Tetőfedő Kft., Erdősi Imre utca 2.,
+       Kecskemét 6000. Phone 06 70 363 7817, email
+       info@hiros-tetofedes.hu (also hirosrapid@gmail.com per company
+       records), contact Gábor Bálint. Real detail pulled from their own
+       site hiros-tetofedes.hu: "több évtizede készítünk tetőket magán
+       személyeknek, cégeknek", "több generációs tapasztalat", full range
+       tetőfedés/tetőfelújítás/tetőszigetelés/ács/bádogos, several covering
+       types including korcolt (standing-seam) lemezfedés, cserepeslemez,
+       trapézlemez and zsindely, Lindab ereszcsatorna telepítés és javítás,
+       viharkár és egyéb káresemények javítása, up to 10 year warranty on
+       roof coverings, nationwide operation. Milan's own cold-open line to
+       this prospect noted their korcolt lemezfedés specifically ("Látom,
+       hogy Önnél is szerepel a korcolt"), so the scenario uses that exact
+       material rather than a generic one, to stay consistent with what he
+       actually told them he looked at.
+       Fifth roofing-family demo, so needed a job shape distinct from
+       Keszthelyi Tető (full pitched-tile teardown), Tetőfedés Szaki (flat
+       garage roof membrane swap), Kozák (palatető overlay, no demolition)
+       and DECZKY (brand new timber structure). This one uses their own
+       real storm-damage repair service: a viharkár job, partial korcolt
+       lemezfedés blown loose in a storm plus a snapped Lindab
+       ereszcsatorna section, not a full re-roof, and leans on the real
+       10-year warranty and multi-generational-experience lines rather
+       than invented ones.
+       Logo pulled straight from their live site
+       (hiros-tetofedes.hu, images/logo@2x.png), a real navy-blue house
+       icon plus wordmark, "HÍRÖS" in navy and "TETŐFEDŐ" in red, sampled
+       by pixel (navy #123350, red #ca3d3d). THEME builds a deep navy base
+       from the logo's own navy with the logo's own red as accent, a
+       combination not yet used in the roofing family (Kozák is navy with
+       gold, Tetőfedés Szaki is red on neutral charcoal).
+       Kft. with multi-generational staff, so the agent speaks first
+       person plural throughout (készítünk, javítjuk).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. deep navy base and red accent, both from the real site logo.
+const THEME = {
+  bg:'#0a1826', dark:'#123350', mid:'#1c4a70', brand:'#ca3d3d', bright:'#e2645f',
+  dot:'#f0a19d', chatBg:'#fff6f5', tint:'#fbdedb', tint2:'#fdece9', line:'#f0d2ce',
+  ink:'#1c4a70', inkSoft:'#ca3d3d', ring:'rgba(202,61,61,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Hírös Tetőfedő Kft.',
+    sub: 'Tetőfedés, tetőfelújítás, bádogos munkák, több generációs tapasztalattal',
+    tagline: 'Kecskemét, országosan vállalunk munkát',
+    initial: 'H',
+    logoSrc: 'hiros-tetofedo-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'tetőfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '21:14',
+  ownerBenefit: 'Rögzítve és minősítve 21:14-kor, miközben épp egy másik munkán voltatok. Reggel egy induláskész érdeklődőre ébredtek, típussal és részletekkel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Jó napot! Szeretne árajánlatot kérni tetőmunkára?" },
+  { r:'user',  t:"Igen, a tegnapi vihar felszakított néhány korcolt lemezt a tetőnkről" },
+  { r:'agent', t:"Sajnálom, ez elég gyakori az ilyen erős széllel. Nagyjából mekkora felületet érintett?" },
+  { r:'user',  t:"Kb 35-40 nm-es rész mozdult meg, néhány lemez teljesen leszakadt" },
+  { r:'agent', t:"Beázott már valahol, vagy egyelőre száraz maradt a tetőtér?" },
+  { r:'user',  t:"Egyelőre száraz, de tartunk tőle, hogy megint esni fog" },
+  { r:'agent', t:"Jól teszi, hogy most szól, ilyenkor a gyors javítás számít. Mivel eleve korcolt lemezfedés van a tetőn, ugyanazzal az anyaggal tudjuk pótolni, nem kell az egész tetőt bontani. Az ereszcsatorna sérült valamennyire?" },
+  { r:'user',  t:"Igen, egy szakasz Lindab csatorna is letört a lezuhanó lemez alatt" },
+  { r:'agent', t:"Azt is bekalkuláljuk, egyben megoldjuk. Az új fedésre 10 év garanciát adunk. Mikorra kellene?" },
+  { r:'user',  t:"Minél hamarabb, amíg jó az idő" },
+  { r:'agent', t:"Egy ekkora javítást jellemzően 1-2 nap alatt megoldunk. Melyik városban van?" },
+  { r:'user',  t:"Lajosmizsén" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt a javításra?" },
+  { r:'user',  t:"600 és 800 ezer forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora viharkárra a csatornajavítással együtt. Több generációs tapasztalattal dolgozunk, úgyhogy a kivitelezés miatt nem kell aggódnia. Elkérhetem a nevét?" },
+  { r:'user',  t:"Tóth Zsófia" },
+  { r:'agent', t:"Köszönöm, Zsófia. Milyen számon érjük el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0378" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"zsofia.toth@gmail.com" },
+  { r:'agent', t:"Köszönöm, Zsófia, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 620_000, mid: 680_000, upper: 750_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Viharkár felmérése és állagvizsgálat',           amt:  40_000 },
+    { label:'Korcolt lemezfedés pótlása (kb 35-40 nm)',        amt: 480_000 },
+    { label:'Lindab ereszcsatorna szakasz cseréje',            amt: 160_000 },
+  ],
+  customer: {
+    'Name':'Zsófia Tóth',
+    'Phone':'+36 30 555 0378',
+    'Email':'zsofia.toth@gmail.com',
+  },
+  timingShort: '1-2 nap',
+  jobTags: ['Viharkár, kb 35-40 nm korcolt lemezfedés érintett', 'Lindab ereszcsatorna szakasz cseréje', 'Egyelőre nem ázott be a tetőtér', '10 év garancia az új fedésre', 'Több generációs tapasztalat'],
+  budget: { low: 600_000, high: 800_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Lajosmizse', clientZip: '6050',
+  companyCity: 'Kecskemét', distanceMi: 20,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
