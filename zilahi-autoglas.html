@@ -25,12 +25,12 @@
        Sárospatak already run casco-funded jobs, Pelcz runs a declined
        one), even though this shop's own site does mention insurance
        claim support.
-       The file the user supplied ("zilahi autoglass.jpg") is not a clean
-       logo mark, it is a full flyer/business-card scan with a cartoon
-       mascot and dense text, same situation as Gáz-Lak Mester's excavator
-       photo. Flagged this to the user rather than forcing the flyer into
-       the widget's small circular logo slot; shipped with the engine's
-       letter-badge fallback (CONFIG.brand.initial, empty logoSrc) for now.
+       The file the user supplied ("zilahi autoglass.jpg" / "zilahi
+       autoglass logo.jpg") is not a clean logo mark, it is a full
+       flyer/business-card scan with a cartoon mascot and dense text, same
+       situation as Gáz-Lak Mester's excavator photo. Flagged this; Milan
+       chose to use it as-is anyway (same call he made on Gáz-Lak), so it's
+       wired in as logoSrc rather than the letter-badge fallback.
        THEME approximates the flyer's own red-and-navy scheme by eye (not
        precisely pixel-sampled, the source is a busy low-res scan) on a
        navy-black base, a combination not yet used in the gallery, Dombóvár
@@ -61,7 +61,7 @@ const CONFIG = {
     sub: 'Autóüveg centrum, karosszéria javítás és fényezés, 1993 óta',
     tagline: 'Szolnok, az Ön autója a legjobb kezekben van',
     initial: 'Z',
-    logoSrc: '',
+    logoSrc: 'zilahi-autoglas-logo.jpg',
     fbHandle: '',
     online: 'Online · Másodperceken belül válaszolunk',
   },
