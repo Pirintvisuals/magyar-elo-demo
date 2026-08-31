@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Autóüveg Sárospatak, Nagy Lajos utca 2., Sárospatak.
+       Phone +36 30 913 7927, email patakimoso@gmail.com. No usable About
+       text on FB (name/location only), no reachable own site, so real
+       detail came from an aggregated search result rather than a primary
+       page: they do personal, small AND heavy vehicle glass, and they
+       handle casco arrangements. Same treatment as Dunaújváros, built off
+       search results rather than a live site.
+       Ninth windscreen demo in the gallery, so the vehicle class had to be
+       the differentiator, not just the story. Six demos already cover
+       passenger cars (chip/crack repair three times over, headlight
+       polish, casco swap, aftermarket self-pay swap), and Pelcz Autóüveg
+       already covers the heavy end (a haulier's MAN TGL). This one uses
+       the untouched middle segment implied by their own "kis- és
+       tehergépjárművekhez is" service line: a small commercial van, a
+       2019 Ford Transit run by a local courier, where the pain is a
+       missed delivery route rather than a stalled building site. Kept it
+       cash/company-invoice rather than a third casco storyline (Debrecen
+       casco-funded, Pelcz casco-declined already cover that ground), and
+       left ADAS and specific tenure claims out entirely since neither was
+       confirmed from a real source.
+       Logo is a white circular badge, blue windscreen-and-car icon plus a
+       near-black/grey two-line wordmark, sampled by pixel (icon blue
+       #0081c9, wordmark near-black #0d0d0d, subtitle grey #7b7b79). That
+       blue is close to Autóüveg Debrecen's #008dd2 and Autóüveg Centrum
+       Debrecen's #01a0e2, both already on cool blue-tinted navy bases, so
+       a third demo built the same way would read as a reskin. THEME shifts
+       the accent toward a cooler cyan-teal reading and sits it on a warm
+       neutral charcoal-black base instead of navy, so it stays true to the
+       logo's blue without cloning either Debrecen demo's palette.
+       Branded company name, not a personal one, and no solo-operator
+       evidence, so the agent speaks first person plural throughout
+       (cserélünk, vállaljuk), same register as the two Debrecen demos.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. warm neutral charcoal-black base, cyan-teal accent shifted from the logo's blue.
+const THEME = {
+  bg:'#11100e', dark:'#221f1b', mid:'#3a352f', brand:'#0ea5c4', bright:'#3dc6dd',
+  dot:'#8fe0ee', chatBg:'#f2fcfd', tint:'#d8f3f7', tint2:'#e8f8fa', line:'#c9e9ee',
+  ink:'#3a352f', inkSoft:'#0ea5c4', ring:'rgba(14,165,196,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Autóüveg Sárospatak',
+    sub: 'Szélvédőcsere és javítás, személy-, kis- és tehergépjárművekhez',
+    tagline: 'Sárospatak, casco kárügyintézéssel',
+    initial: 'A',
+    logoSrc: 'autouveg-sarospatak-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőcsere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '07:52',
+  ownerBenefit: 'Rögzítve és minősítve 07:52-kor, még nyitás előtt. Mire kinyittok, egy induláskész érdeklődő vár, típussal és időponttal együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Jó napot! Szeretne árajánlatot kérni szélvédőcserére vagy javításra?" },
+  { r:'user',  t:"Cserére lesz szükség. A furgonunk szélvédője pár hete egy kis kavicsot kapott, azóta megnyúlt a repedés" },
+  { r:'agent', t:"Értem. Mekkora most a repedés, és merre fut rajta?" },
+  { r:'user',  t:"Már úgy 15 centi, keresztben, a vezető oldala felé közelít" },
+  { r:'agent', t:"Ekkora méretnél, pláne a vezető látóterének közelében, javítás már nem opció, ott csere kell. Milyen típus és évjárat?" },
+  { r:'user',  t:"2019-es Ford Transit, a cégünk kiszállító furgonja" },
+  { r:'agent', t:"Köszönöm. Van rá casco?" },
+  { r:'user',  t:"A furgonra nincs, azt cégre számlázva rendezzük" },
+  { r:'agent', t:"Rendben, akkor sima számlás cserével számolunk. Mikorra kellene?" },
+  { r:'user',  t:"Minél hamarabb, mert amíg áll, addig nem megyünk ki a mai fuvarokra" },
+  { r:'agent', t:"Ezt ismerjük, a legtöbb ilyen furgont aznap kiadjuk. Ha reggel behozza, a csere maga 2-3 óra, utána a ragasztó kötési ideje miatt még kell nálunk hagyni egy órát." },
+  { r:'user',  t:"Az belefér, ma reggel behozom" },
+  { r:'agent', t:"A telephely a Nagy Lajos utca 2. alatt van, Sárospatakon. Melyik városban vannak?" },
+  { r:'user',  t:"Sátoraljaújhelyen, onnan járunk be" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt a cserére?" },
+  { r:'user',  t:"75 és 95 ezer közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora kisteherautó szélvédőjére. Elkérhetem a nevét?" },
+  { r:'user',  t:"Farkas Dávid" },
+  { r:'agent', t:"Köszönöm, Dávid. Milyen számon érjük el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0341" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"david.farkas@gmail.com" },
+  { r:'agent', t:"Köszönöm, Dávid, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 78_000, mid: 85_000, upper: 95_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Régi szélvédő kibontása és keret előkészítése',   amt: 15_000 },
+    { label:'Kisteherautó szélvédő üveg (2019 Ford Transit)',  amt: 55_000 },
+    { label:'Beépítés poliuretán ragasztással és tömítéssel',  amt: 15_000 },
+  ],
+  customer: {
+    'Name':'Dávid Farkas',
+    'Phone':'+36 20 555 0341',
+    'Email':'david.farkas@gmail.com',
+  },
+  timingShort: 'Aznap, 2-3 óra',
+  jobTags: ['2019-es Ford Transit, kb 15 cm-es repedés', 'Csere, javítás már nem opció a vezető közelében', 'Számlás fizetés, casco nélkül', 'Aznapi kiadás, hogy a fuvarok ne csússzanak', 'Kis- és tehergépjárművekhez is vállalják'],
+  budget: { low: 75_000, high: 95_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Sátoraljaújhely', clientZip: '3980',
+  companyCity: 'Sárospatak', distanceMi: 18,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
