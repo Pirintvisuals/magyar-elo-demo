@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. JoeandGlass, Jászai Mari utca 25., Szombathely 9700.
+       Phone (30) 721 9772, email sziberzsolt2018@gmail.com. Lead came in as
+       a bare contact card, no FB About text, no working site (fix24.hu
+       listing 522'd, joszaki.hu and qjob.hu had no listing under this
+       name), and no logo file. Kept the demo to what's actually
+       verifiable: name, address, phone, email, and that this is a
+       windscreen chip/crack repair business in Szombathely. Deliberately
+       did NOT put a specific years-of-experience number or the owner's
+       name in the dialogue, since neither was confirmed from a real
+       source, only guessed from the email handle, per Milan's standing
+       "no unverified claims" rule. No logo file, so shipped with the
+       engine's built-in letter-badge fallback (CONFIG.brand.initial,
+       empty logoSrc), same as Kozák tetőfedő mester, rather than waiting
+       or inventing a mark. Solo operator (personal gmail, one phone
+       number), so the agent speaks first person singular throughout.
+       Eighth windscreen demo in the gallery. Needed a genuinely different
+       angle after Kecskemét (formula pricing), Dombóvár (30 min, free
+       callout in a fixed area, lifetime warranty), Dunaújváros (star
+       crack, ~30 years, fixed Tesco spot), Győr (headlight polish led),
+       Debrecen (casco swap) and Centrum Debrecen (aftermarket self-pay
+       swap). This one leads with going to the CUSTOMER wherever they
+       actually are, home or workplace, anywhere in Szombathely, rather
+       than a fixed meeting spot, and charges an explicit kiszállási díj
+       for that flexibility instead of Dombóvár's free-callout model,
+       which is a real and different value proposition, not a reskin.
+       THEME is a fresh violet, unused anywhere else in the gallery so far
+       (the other blues, reds, ambers, greens, browns and teals are all
+       taken), picked thematically since there was no logo to sample from.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. fresh violet, thematic (no logo to sample from).
+const THEME = {
+  bg:'#150b24', dark:'#241442', mid:'#3d1f6e', brand:'#9333ea', bright:'#b565f5',
+  dot:'#d3a4fa', chatBg:'#faf5ff', tint:'#ede0fc', tint2:'#f4ecfd', line:'#e1cef8',
+  ink:'#3d1f6e', inkSoft:'#9333ea', ring:'rgba(147,51,234,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'JoeandGlass',
+    sub: 'Szélvédőjavítás, kiszállással hozzád Szombathelyen',
+    tagline: 'Szombathely, oda megyek, ahol te vagy',
+    initial: 'J',
+    logoSrc: '',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'szélvédőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '11:24',
+  ownerBenefit: 'Rögzítve és minősítve 11:24-kor, miközben te épp egy másik munkán voltál. Estére egy induláskész érdeklődőre vársz, hellyel és időponttal együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédő javítására?" },
+  { r:'user',  t:"Igen, tegnap kapott egy kavicsot az autópályán, most egy kis törés van rajta" },
+  { r:'agent', t:"Az elég gyakori, jó eséllyel simán javítható. Nagyjából mekkora a törés?" },
+  { r:'user',  t:"Kicsi, talán fél centis, de félek, hogy tovább repedne" },
+  { r:'agent', t:"Jól teszed, hogy most szólsz, ekkora méretnél még tiszta a javítás, gyantával feltöltöm és leragasztódik. Merre helyezkedik el a szélvédőn?" },
+  { r:'user',  t:"Bal oldalt, nem a vezető látóterében" },
+  { r:'agent', t:"Az jó hír. Hol lenne kényelmes neked? Nem kell hozzám bejönnöd, hozzád is ki tudok menni." },
+  { r:'user',  t:"Az remek lenne, mert napközben nehezen tudok elszabadulni. Ki tudnál jönni a munkahelyemre?" },
+  { r:'agent', t:"Persze, Szombathelyen belül bárhova kimegyek, akár a munkahelyi parkolóba is. A javítás maga kb 20-30 perc, amíg te dolgozol, addig kész is vagyok vele." },
+  { r:'user',  t:"Az nagyon jól hangzik" },
+  { r:'agent', t:"Mikor lenne jó?" },
+  { r:'user',  t:"Holnap délután, ha belefér" },
+  { r:'agent', t:"Belefér. Melyik városban vagy?" },
+  { r:'user',  t:"Szombathelyen" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál a javításra?" },
+  { r:'user',  t:"15 és 22 ezer forint között gondoltam" },
+  { r:'agent', t:"Ez pont beleillik abba, amit egy ekkora, kis méretű kőfelverődésnél szoktam kérni, a kiszállással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Németh Bence" },
+  { r:'agent', t:"Köszönöm, Bence. Milyen számon érlek el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0327" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"bence.nemeth@gmail.com" },
+  { r:'agent', t:"Köszönöm, Bence, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 16_000, mid: 18_000, upper: 21_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni kiszállás, munkahelyi cím',        amt:  5_000 },
+    { label:'Gyantás javítás, kis kőfelverődés',           amt:  9_000 },
+    { label:'UV-kikeményítés és polírozás',                amt:  4_000 },
+  ],
+  customer: {
+    'Name':'Bence Németh',
+    'Phone':'+36 20 555 0327',
+    'Email':'bence.nemeth@gmail.com',
+  },
+  timingShort: '20-30 perc',
+  jobTags: ['Kis kőfelverődés, kb 0,5 cm', 'Nem a vezető közvetlen látóterében', 'Kiszállás a munkahelyi parkolóba', 'Gyantás javítás UV-kikeményítéssel', 'Másnapi időpont, délután'],
+  budget: { low: 15_000, high: 22_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Szombathely', clientZip: '9700',
+  companyCity: 'Szombathely', distanceMi: 4,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
