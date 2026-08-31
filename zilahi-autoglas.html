@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Zilahi Autoglas, Százados út 2., Szolnok 5000.
+       Phone (56) 423 000, email zilahiautoglas@gmail.com, site
+       zilahiautoglas.hu. Real detail pulled from their own site: founded
+       1993 (30+ years), full range beyond just glass, autóüveg csere,
+       szélvédőjavítás, autófesték keverés (custom paint mixing),
+       fényszóró felújítás, karosszéria javítás és fényezés, and
+       biztosítói kárfelmérés on-site. Own philosophy line "szakértelem,
+       megbízhatóság és ügyfélközpontúság" and tagline "az Ön autója a
+       legjobb kezekben van" used for the hero sub/tagline.
+       Tenth windscreen demo in the gallery, so needed a genuinely new job
+       shape, not another single-focus glass job. This is the first demo
+       to use the shop's real cross-trade range: a windscreen replacement
+       plus an in-house paint touch-up on the same visit (a door-edge chip
+       from the same stone-hit), using their own autófesték keverés to
+       colour-match rather than sending the customer to a separate body
+       shop. That is a genuinely different value prop from every prior
+       glass demo, all of which are glass-only businesses. Kept it
+       self-pay/cash rather than a third casco storyline (Debrecen and
+       Sárospatak already run casco-funded jobs, Pelcz runs a declined
+       one), even though this shop's own site does mention insurance
+       claim support.
+       The file the user supplied ("zilahi autoglass.jpg") is not a clean
+       logo mark, it is a full flyer/business-card scan with a cartoon
+       mascot and dense text, same situation as Gáz-Lak Mester's excavator
+       photo. Flagged this to the user rather than forcing the flyer into
+       the widget's small circular logo slot; shipped with the engine's
+       letter-badge fallback (CONFIG.brand.initial, empty logoSrc) for now.
+       THEME approximates the flyer's own red-and-navy scheme by eye (not
+       precisely pixel-sampled, the source is a busy low-res scan) on a
+       navy-black base, a combination not yet used in the gallery, Dombóvár
+       and Tetőfedés Szaki are both red-on-neutral-black, neither is navy.
+       Established company with staff since 1993, so the agent speaks
+       first person plural throughout (vállaljuk, festünk).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. navy-black base, red accent approximated from the flyer scan.
+const THEME = {
+  bg:'#0d1024', dark:'#181c38', mid:'#2b2f54', brand:'#d81f26', bright:'#ec4c4c',
+  dot:'#f28f8f', chatBg:'#fff5f5', tint:'#ffe0e0', tint2:'#ffecec', line:'#f0d0d0',
+  ink:'#2b2f54', inkSoft:'#d81f26', ring:'rgba(216,31,38,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Zilahi Autoglas',
+    sub: 'Autóüveg centrum, karosszéria javítás és fényezés, 1993 óta',
+    tagline: 'Szolnok, az Ön autója a legjobb kezekben van',
+    initial: 'Z',
+    logoSrc: '',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőcsere',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '16:27',
+  ownerBenefit: 'Rögzítve és minősítve 16:27-kor, miközben épp egy másik munkán voltatok. Reggel egy induláskész érdeklődőre ébredtek, típussal és részletekkel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Jó napot! Szeretne árajánlatot kérni szélvédőcserére vagy javításra?" },
+  { r:'user',  t:"Cserére, egy kavics eltalálta a szélvédőt, és a törés a szélén elindult befelé" },
+  { r:'agent', t:"Értem. Milyen típus és évjárat?" },
+  { r:'user',  t:"2016-os VW Golf" },
+  { r:'agent', t:"Köszönöm. Mekkora a törés, és merre van rajta?" },
+  { r:'user',  t:"Kb 4 centis, a bal alsó sarok felé" },
+  { r:'agent', t:"A szélén induló törésnél már csere kell, ott a javítás nem tartós. Az üvegkeret közelében esetleg más sérülés is keletkezett a kavicstól?" },
+  { r:'user',  t:"Igen, az ajtó szélén is van egy lepattant festékfolt, ugyanattól a kavicstól" },
+  { r:'agent', t:"Azt is meg tudjuk oldani egyben, saját festékkeverésünk van, pontosan az autó színére keverjük, nem kell külön fényezőhöz vinni. Mikorra kellene a csere?" },
+  { r:'user',  t:"Minél hamarabb, mert félek, hogy a törés tovább fut" },
+  { r:'agent', t:"Jól teszi, hogy most foglalkozik vele. A csere és a kis felületű fényezés egy behozatallal megoldható, nagyjából fél napot vesz igénybe a ragasztó kötési idejével együtt." },
+  { r:'user',  t:"Az belefér" },
+  { r:'agent', t:"Melyik városban van?" },
+  { r:'user',  t:"Törökszentmiklóson" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt a cserére és a javításra?" },
+  { r:'user',  t:"65 és 85 ezer közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora törésnél a fényezéssel együtt. 1993 óta foglalkozunk ezzel, úgyhogy a beépítés és a színillesztés miatt sem kell aggódnia. Elkérhetem a nevét?" },
+  { r:'user',  t:"Balogh Petra" },
+  { r:'agent', t:"Köszönöm, Petra. Milyen számon érjük el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0356" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"petra.balogh@gmail.com" },
+  { r:'agent', t:"Köszönöm, Petra, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 68_000, mid: 75_000, upper: 85_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Régi szélvédő kibontása és keret előkészítése', amt: 12_000 },
+    { label:'Szélvédő üveg (2016 VW Golf)',                   amt: 35_000 },
+    { label:'Beépítés poliuretán ragasztással és tömítéssel', amt: 13_000 },
+    { label:'Ajtószél kis felületű fényezés, színre keverve', amt: 15_000 },
+  ],
+  customer: {
+    'Name':'Petra Balogh',
+    'Phone':'+36 30 555 0356',
+    'Email':'petra.balogh@gmail.com',
+  },
+  timingShort: 'Fél nap',
+  jobTags: ['2016-os VW Golf, kb 4 cm-es szélső törés', 'Csere, a szél felől induló törésnél javítás nem tartós', 'Ajtószél festékkopás ugyanattól a kavicstól', 'Saját festékkeverés, színre illesztve', '1993 óta autóüveg és karosszéria egy helyen'],
+  budget: { low: 65_000, high: 85_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Törökszentmiklós', clientZip: '5200',
+  companyCity: 'Szolnok', distanceMi: 22,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
