@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Börczi Szabolcs (brand "BS Tiles"), 9600 Sárvár,
+       Óvár utca 11. Phone +36 30 231 2625, email info@borcziszabolcs.com,
+       site borcziszabolcs.com. Real detail pulled from his own site:
+       solo burkoló (tiler), not a broker, "nem vagyok közvetítő, magam
+       végzem a munkát", works in Szombathely and Austria's Burgenland
+       region, own philosophy "inkább szánok több időt egy munkára, mint
+       hogy reklamációval foglalkozzak", strong substrate-prep emphasis
+       ("a tartós burkolat azzal kezdődik, amit nem látsz"), works with
+       ceramic, porcelain gres, mosaics, glass mosaic and natural stone,
+       tile sizes 5x20 up to 60x120 cm, concrete grinder and 1200mm wet
+       saw for granite/travertin, padlófűtéses aljzatok burkolása, 1 year
+       minimum warranty (3 years on new residential builds per Hungarian
+       law), supplier partners Trend Burkolat, Palco Kft. and Bonita
+       Fürdőszoba Szalon.
+       This prospect replied with a real, fair pushback: he already built
+       himself something similar for calculation and pointed out a
+       universal template can't fit every company's actual needs. Rather
+       than answer in words only, this demo answers it directly, built
+       from his own real specifics (padlófűtés-safe tiling technique,
+       large-format gres, the substrate-prep philosophy) instead of a
+       generic tiling scenario.
+       First dedicated bathroom-TILING specialist demo in the gallery
+       (Banacraft covers general fürdőszoba felújítás as one of several
+       services, not a tiling specialist). Scenario: a bathroom retile
+       with large-format 60x90 porcelain gres over an existing padlófűtés
+       (floor heating needs specific tiling technique, a real technical
+       point from his site, not generic), plus a mosaic accent strip in
+       the shower, using his real substrate-prep emphasis as the trust
+       beat. Client is in Rohonc (Rechnitz), Burgenland, Austria, the
+       first demo in this gallery with a client across the Austrian
+       border, matching his own stated cross-border service area; priced
+       in Ft regardless, consistent with how Hungarian trades quote
+       Austrian jobs.
+       Logo pulled straight from his own site (bszlogo.png): navy
+       background #1c2b41, a geometric "S" mark in white, orange #f15a22
+       and blue #4084c5, "BS TILES" wordmark. THEME uses the navy base
+       with the orange as primary accent, since orange is the mark's most
+       visually dominant non-neutral colour and no other demo in the
+       gallery pairs navy with this particular red-orange (Győr's orange
+       is warmer/golden, DECZKY's is amber).
+       Solo operator, explicitly "not a broker, I do the work myself", so
+       the agent speaks first person singular throughout (burkolok,
+       készítem).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. navy base and red-orange accent, both from the real site logo.
+const THEME = {
+  bg:'#0e1726', dark:'#1c2b41', mid:'#2b3f5c', brand:'#f15a22', bright:'#f47f4f',
+  dot:'#f8ab84', chatBg:'#fff6f2', tint:'#fde0d0', tint2:'#feece1', line:'#f2d6c4',
+  ink:'#2b3f5c', inkSoft:'#f15a22', ring:'rgba(241,90,34,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'BS Tiles',
+    sub: 'Burkolás fürdőszobába és konyhába, Börczi Szabolcs',
+    tagline: 'Sárvár, Szombathely és Burgenland, nem közvetítő, magam dolgozom',
+    initial: 'B',
+    logoSrc: 'borczi-szabolcs-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'burkolás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '11:19',
+  ownerBenefit: 'Rögzítve és minősítve 11:19-kor, miközben épp egy másik munkán voltál. Estére egy induláskész érdeklődőre vársz, méretekkel és anyagválasztással együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni burkolásra?" },
+  { r:'user',  t:"Igen, a fürdőszobánkat szeretnénk újraburkolni" },
+  { r:'agent', t:"Rendben, mekkora a fürdő, és nagyjából mekkora felületet érint a burkolás, falat és padlót is?" },
+  { r:'user',  t:"Kb 8 nm-es a fürdő, fal és padló együtt kb 25 nm felület" },
+  { r:'agent', t:"Köszönöm. Milyen csempét, milyen méretet képzeltél el?" },
+  { r:'user',  t:"Nagyméretű, gres jellegű csempét szeretnénk, sok helyen ilyet láttunk mostanában" },
+  { r:'agent', t:"Nagyméretű, akár 60x90-es gres kerámiával is szoktam dolgozni, ehhez lézeres vízmértékkel dolgozom, hogy tényleg síkban legyen. Van a fürdőben padlófűtés?" },
+  { r:'user',  t:"Igen, tavaly szereltették be" },
+  { r:'agent', t:"Azt jó, hogy szólsz, padlófűtésnél más aljzatkezelés és rugalmas ragasztó kell, különben elreped a burkolat a hőmozgástól. Terveztek valami dísztelemet is, mondjuk egy mozaikcsíkot a zuhanyzóba?" },
+  { r:'user',  t:"Igen, azt is szeretnénk" },
+  { r:'agent', t:"Azt is bevállalom, szépen kiegészíti a nagyméretű lapokat. Az aljzat-előkészítést mindig alaposan csinálom, a tartós burkolat azzal kezdődik, amit nem látsz. Mikorra kellene elkészülnie?" },
+  { r:'user',  t:"3-4 héten belül jó lenne" },
+  { r:'agent', t:"Az belefér. Melyik városban van a fürdő?" },
+  { r:'user',  t:"Rohoncon, Burgenlandban" },
+  { r:'agent', t:"Oda is szoktam kijárni, semmi gond. Nagyjából milyen összeggel számoltatok a teljes munkára?" },
+  { r:'user',  t:"700 és 850 ezer forint közé saccoltuk" },
+  { r:'agent', t:"Ez reális egy ekkora nagyméretű gres burkolásra a padlófűtéses aljzattal és a mozaikcsíkkal együtt. Nem vagyok közvetítő, magam végzem a munkát, úgyhogy a kivitelezés miatt nem kell aggódnod. Elkérhetem a neved?" },
+  { r:'user',  t:"Gruber Anna" },
+  { r:'agent', t:"Köszönöm, Anna. Milyen számon érlek el a legkönnyebben?" },
+  { r:'user',  t:"+43 660 555 0417" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"anna.gruber@gmail.com" },
+  { r:'agent', t:"Köszönöm, Anna, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 700_000, mid: 750_000, upper: 820_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Aljzat-előkészítés és hidroszigetelés, padlófűtéshez igazítva', amt: 180_000 },
+    { label:'Nagyméretű (60x90) gres burkolás, kb 25 nm fal és padló',        amt: 480_000 },
+    { label:'Mozaikcsík díszítőelem a zuhanyzóban',                           amt:  90_000 },
+  ],
+  customer: {
+    'Name':'Anna Gruber',
+    'Phone':'+43 660 555 0417',
+    'Email':'anna.gruber@gmail.com',
+  },
+  timingShort: '3-4 hét',
+  jobTags: ['8 nm-es fürdő, kb 25 nm fal és padló felület', 'Nagyméretű (60x90) gres kerámia', 'Padlófűtéshez igazított aljzat és rugalmas ragasztó', 'Mozaikcsík díszítőelem a zuhanyzóban', 'Nem közvetítő, saját kivitelezés'],
+  budget: { low: 700_000, high: 850_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Rohonc (Ausztria)', clientZip: '7471',
+  companyCity: 'Sárvár', distanceMi: 43,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
