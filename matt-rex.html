@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Matt-Rex Kft. (brand "Matthias Rex"), Iparos u. 42.,
+       Érd 2030, phone +36 30 557 0056, email szelvedojavitas@m-rex.hu.
+       This prospect caught Milan repeating a stock "nincs weboldala" line
+       he hadn't actually verified, and he owned the mistake rather than
+       inventing a cover story, per Milan's standing "never fabricate a
+       justification" rule. Built this demo off real detail afterward:
+       their customer-facing site szelvedojavitas-erd.hu (premium auto
+       glass service since 2020, 5000+ repairs, 243+ five-star Google
+       reviews, up to 5 year repair warranty, XPEL stone-protection film,
+       nano impregnation, headlight polishing, tinting, fleet discounts,
+       tagline "Látni és látszani!", mobile dispatch "akár aznap"), plus
+       their separate wholesale/training site m-rex.hu (official Delta
+       Kits distributor, "szakemberektől, szakembereknek"). Wide real
+       service area given directly by the prospect: Érd, Tárnok, Diósd,
+       Pusztazámor, Biatorbágy, Törökbálint, Sóskút, Budaörs,
+       Százhalombatta.
+       Eleventh windscreen-family demo in the gallery, so needed a job
+       shape none of the ten prior ones use. This is the first to lean on
+       PREVENTION rather than just repair: alongside a small chip repair,
+       the customer adds XPEL stone-protection film across the whole
+       windscreen so future stone hits don't crack it at all, using their
+       own real XPEL offering rather than inventing an upsell. No other
+       glass demo in the gallery sells protective film. Cited the real
+       5000+ repairs / 243 reviews stat as the trust beat instead of a
+       generic years-in-business line, since that is what their own site
+       actually leads with.
+       Logo is a black shield crest with a car silhouette and "MATTHIAS
+       REX" in champagne gold, sampled by pixel (bg near-black #000000,
+       gold #c9a769, highlight #e0c98d). Kozák tetőfedő mester already
+       uses navy-and-gold, but on a navy-tinted charcoal base; this one is
+       true black, matching the logo exactly, which keeps the two
+       readable as different demos rather than a near-duplicate.
+       Established Kft with multiple workshops (Budapest, Érd, Diósd per
+       their own text), so the agent speaks first person plural throughout
+       (vállaljuk, kijövünk).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. true black base from the logo, champagne gold accent from the crest.
+const THEME = {
+  bg:'#0a0a0a', dark:'#181818', mid:'#2e2a20', brand:'#c9a769', bright:'#ddc38f',
+  dot:'#ecdcb3', chatBg:'#fdfaf3', tint:'#f3e9d2', tint2:'#f8f1e2', line:'#e9dcbc',
+  ink:'#2e2a20', inkSoft:'#c9a769', ring:'rgba(201,167,105,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Matt-Rex',
+    sub: 'Szélvédőjavítás és XPEL kőfelverődés-védő fólia, Delta Kits technológiával',
+    tagline: 'Érd és térsége, 5000+ javítás, 243+ öt csillagos értékelés',
+    initial: 'M',
+    logoSrc: 'matt-rex-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'szélvédőjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '13:42',
+  ownerBenefit: 'Rögzítve és minősítve 13:42-kor, miközben épp egy másik munkán voltatok. Estére egy induláskész érdeklődő vár, típussal és időponttal együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni a szélvédő javítására?" },
+  { r:'user',  t:"Igen, egy kis kőfelverődés van rajta, tegnap kaptam az autópályán" },
+  { r:'agent', t:"Az elég gyakori, jó eséllyel simán javítható Delta Kits technológiával. Nagyjából mekkora, és merre van a szélvédőn?" },
+  { r:'user',  t:"Kicsi, talán fél centis, a jobb oldali harmadban" },
+  { r:'agent', t:"Az ideális eset, ötéves garanciával javítjuk. Ha már úgyis nálunk jársz, érdekelne, hogy XPEL kőfelverődés-védő fóliát is felteszünk, hogy a jövőben ne kelljen ezt megint átélned?" },
+  { r:'user',  t:"Ez érdekes, mennyivel véd többet?" },
+  { r:'agent', t:"A teljes szélvédőre kerül, felfogja a kisebb kavicsok becsapódását, mielőtt törést okoznának. Nálunk ez a leggyakoribb kombináció, sokan a javítással egyszerre kérik." },
+  { r:'user',  t:"Akkor azt is kérem" },
+  { r:'agent', t:"Rendben, egyben elintézzük. Mikorra kellene?" },
+  { r:'user',  t:"Minél hamarabb, ha lehet" },
+  { r:'agent', t:"Akár aznap ki tudunk menni hozzád, a javítás 30-60 perc, a fólia felhelyezése még kb egy óra. Melyik városban vagy?" },
+  { r:'user',  t:"Biatorbágyon" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál a kettőre együtt?" },
+  { r:'user',  t:"65 és 85 ezer közé saccoltam" },
+  { r:'agent', t:"Ez reális a javítással és a teljes szélvédős fóliázással együtt. 5000-nél is több javítást csináltunk már, 243 feletti öt csillagos értékeléssel, úgyhogy a minőség miatt nem kell aggódnod. Elkérhetem a neved?" },
+  { r:'user',  t:"Kelemen Nóra" },
+  { r:'agent', t:"Köszönöm, Nóra. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0392" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"nora.kelemen@gmail.com" },
+  { r:'agent', t:"Köszönöm, Nóra, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 68_000, mid: 75_000, upper: 85_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Helyszíni javítás, kis kőfelverődés (5 év garancia)', amt: 12_000 },
+    { label:'XPEL kőfelverődés-védő fólia, teljes szélvédő',        amt: 58_000 },
+    { label:'UV-kikeményítés és minőségellenőrzés',                 amt:  5_000 },
+  ],
+  customer: {
+    'Name':'Nóra Kelemen',
+    'Phone':'+36 20 555 0392',
+    'Email':'nora.kelemen@gmail.com',
+  },
+  timingShort: 'Aznap, kb 1,5-2 óra',
+  jobTags: ['Kis kőfelverődés, kb 0,5 cm', 'Delta Kits gyantás javítás, 5 év garancia', 'XPEL kőfelverődés-védő fólia a teljes szélvédőre', 'Aznapi kiszállás Biatorbágyra', '5000+ javítás, 243+ öt csillagos értékelés'],
+  budget: { low: 65_000, high: 85_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Biatorbágy', clientZip: '2051',
+  companyCity: 'Érd', distanceMi: 9,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
