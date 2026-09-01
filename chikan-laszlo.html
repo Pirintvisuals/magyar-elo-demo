@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Chikán László, Abasár 3261, Pipa utca 7., Heves
+       megye. Phone 06 30 305 4599, email chikan.laszlo@gmail.com, site
+       acstetomester.hu. Real detail pulled from the site: okleveles
+       ácsmester, mestervizsga 1998 Székesfehérváron, Heves megye első
+       tagja a Tető Építők Egyesületének (a real, checkable professional
+       association, not a generic claim), ácsként dolgozik 1989 óta,
+       "Chikán és Kocsis Kkt." 1999-2006, egyéni vállalkozó 2006 óta.
+       Anyagpartnerek: Creaton, Tondach, Lindab, Berner, Würth, Terran.
+       Saját szavakkal: "precíz kivitelezés és a hosszantartó tartósság",
+       egyedi tervezés új építésnél és felújításnál is. Portfolió képei
+       közt valós, egyedi tetőelem is szerepel ("3-as kontycsúcs elosztó
+       kúpelem"), ez adta az ötletet a szcenárióhoz.
+       Hatodik tetőfedő-családbeli demó, ezért megint valódi különbséget
+       kellett találni: Keszthelyi Tető (teljes palatető bontás és csere),
+       Tetőfedés Szaki (lapostető membráncsere), Kozák (palatető
+       ráépítéssel, bontás nélkül), DECZKY (új ácsszerkezet egy kerti
+       házra), Hírös (viharkár javítás). Ez az első, ami egy TELJES ÚJ
+       LAKÓHÁZ tetejét építi meg egyedi tervezéssel, kontycsúcsos
+       formában, díszes kúpelemmel, kihasználva a mesterlevelet és a
+       Creaton cserépfedést mint valódi, ellenőrizhető anyagmárkát.
+       A logóként kapott fájl egy teljes weboldal-fejléc csík (2244x283,
+       fekete-fehér, ház-piktogram + kézírásos "Chikán László" felirat +
+       telefonszám + a Tető Építők Egyesülete jelvénye egyben), nem egy
+       önálló, négyzetes márkajel, hasonló helyzet mint Zilahi Autoglas
+       vagy Gáz-Lak Mester esetén. Egy szűk kivágás a ház-piktogramból egy
+       "Ch" betűtöredékkel csúnyán metszette volna, ezért a widget kis
+       kör alakú logóhelyén inkább a beépített betűjeles tartalék fut
+       (CONFIG.brand.initial, üres logoSrc), amíg nem érkezik egy tiszta
+       márkajel. A kép fekete-fehér, nincs miből színt mintázni, úgyhogy a
+       THEME tematikusan lett kiválasztva (mint Szakszignél), egy meleg,
+       dió-barna famester-paletta, ami még nem szerepel a
+       tetőfedő-családban (Keszthelyi antracit-bronz, Tetőfedés Szaki
+       piros, Kozák sötétkék-arany, DECZKY szürke-borostyán, Hírös
+       sötétkék-piros).
+       Egyéni vállalkozó, 2006 óta egyedül dolgozik, ezért a párbeszéd
+       végig egyes szám első személyben szól (tervezem, építem), mint
+       Csergő Szabolcsnál vagy a Dombóvári és Dunaújvárosi demóknál.
+       Rövid mondatok, gondolatjel nélkül, Milán állandó preferenciája
+       szerint.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. warm walnut-brown, thematic (no colour in the logo strip to sample).
+const THEME = {
+  bg:'#1c120a', dark:'#2e1d10', mid:'#4a2f18', brand:'#c98a3c', bright:'#e0a856',
+  dot:'#f0c88a', chatBg:'#fdf8f0', tint:'#f3e2c4', tint2:'#f8eeda', line:'#ecdab0',
+  ink:'#4a2f18', inkSoft:'#c98a3c', ring:'rgba(201,138,60,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Chikán László',
+    sub: 'Okleveles ácsmester, tetőfedő és bádogos munkák, egyedi tervezéssel',
+    tagline: 'Abasár, a Tető Építők Egyesülete első hevesi tagja',
+    initial: 'C',
+    logoSrc: '',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolok',
+  },
+  niche: 'tetőfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '10:36',
+  ownerBenefit: 'Rögzítve és minősítve 10:36-kor, miközben épp egy másik munkán voltál. Estére egy induláskész érdeklődőre vársz, típussal és részletekkel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőled',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Jó napot! Szeretne árajánlatot kérni tetőmunkára?" },
+  { r:'user',  t:"Igen, épülő házra kellene teljes tetőszerkezet és fedés" },
+  { r:'agent', t:"Rendben, ez egy egyedi tervezésű ácsszerkezetről szól. Mekkora a ház alapterülete, és milyen tetőformát képzelt el?" },
+  { r:'user',  t:"Kb 140 nm-es tető, kontycsúcsos formát szeretnénk" },
+  { r:'agent', t:"Az egy szép, de összetettebb geometria, pontos tervezést igényel. Ácsmesterként én magam tervezem meg a szarufaszerkezetet, hogy a kontyok és a gerinc találkozása is precíz legyen. Gondolt már a gerincre valami dísztelemre, például egy kúpelemre?" },
+  { r:'user',  t:"Igen, láttam a portfóliójában egy ilyet, azt szeretnénk mi is" },
+  { r:'agent', t:"Örülök, hogy megtetszett, azt is meg tudom építeni. Milyen cserepet szeretne rá?" },
+  { r:'user',  t:"Amit ajánl, csak jó minőségű legyen" },
+  { r:'agent', t:"Creaton cseréppel szoktam dolgozni, tartós és a kontycsúcsos formához is jól illeszkedik a sokféle idomelem miatt. A bádogozást, ereszcsatornát is én csinálom hozzá?" },
+  { r:'user',  t:"Igen, azt is kérnénk" },
+  { r:'agent', t:"Rendben, azt is bekalkulálom. Mikorra kellene elkészülnie?" },
+  { r:'user',  t:"A tetőfedés előtt még nincs sürgős határidőnk, de szeretnénk még idén" },
+  { r:'agent', t:"Az belefér, egy ekkora egyedi szerkezet és fedés jellemzően 3-4 hét. Melyik városban van a telek?" },
+  { r:'user',  t:"Gyöngyösön" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt az egészre?" },
+  { r:'user',  t:"3,8 és 4,6 millió forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora egyedi kontycsúcsos szerkezetre a Creaton fedéssel és a bádogozással együtt. Elkérhetem a nevét?" },
+  { r:'user',  t:"Papp Levente" },
+  { r:'agent', t:"Köszönöm, Levente. Milyen számon érem el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0405" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"levente.papp@gmail.com" },
+  { r:'agent', t:"Köszönöm, Levente, már állítom is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 3_800_000, mid: 4_200_000, upper: 4_600_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Egyedi tervezésű ácsszerkezet, kontycsúcsos tető (kb 140 nm)', amt: 2_200_000 },
+    { label:'Creaton cserépfedés, díszes kúpelemmel',                       amt: 1_500_000 },
+    { label:'Bádogozás és ereszcsatorna kiépítése',                         amt:   500_000 },
+  ],
+  customer: {
+    'Name':'Levente Papp',
+    'Phone':'+36 20 555 0405',
+    'Email':'levente.papp@gmail.com',
+  },
+  timingShort: '3-4 hét',
+  jobTags: ['Épülő ház, kb 140 nm-es kontycsúcsos tető', 'Egyedi tervezésű ácsszerkezet, díszes kúpelemmel', 'Creaton cserépfedés', 'Bádogozás és ereszcsatorna kiépítése', 'Okleveles ácsmester, a Tető Építők Egyesülete első hevesi tagja'],
+  budget: { low: 3_800_000, high: 4_600_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Gyöngyös', clientZip: '3200',
+  companyCity: 'Abasár', distanceMi: 8,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
