@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Mosógép és Hűtő szerviz, Szúrmai utca 1.,
+       Hajdúszoboszló, a víztoronnyal szemben. Phone +36 30 571 3020,
+       email kisszemiszerviz@gmail.com, FB facebook.com/mosogepszerviz
+       (186 like). The cold-open wrongly guessed Budapest as the city, the
+       prospect corrected it to Hajdú-Bihar; Milan then confirmed the exact
+       town directly with the prospect (Hajdúszoboszló) rather than
+       guessing further, same no-unverified-claims handling as Tetőfedés
+       Szaki. Real detail from their own listing: brand-independent repair
+       of mosógép, mosogatógép, hűtőgép, szárítógép, elektromos tűzhely
+       and mikrohullámú sütő, guarantee on work and installed parts.
+       Third appliance-repair demo in the gallery, so needed real
+       separation from Csergő Szabolcs (fridge, thermostat) and Sugár
+       Szerviz (washing machine, drain pump). This one uses their own
+       listed dishwasher (mosogatógép) service, which neither of the other
+       two covers: a leaking door seal plus a clogged drain filter, a
+       different failure mode and a different appliance category
+       entirely.
+       No logo file was supplied and none was findable online (their FB
+       page has no usable About text or logo image beyond the page name),
+       so this ships with the engine's letter-badge fallback, same
+       treatment as Kozák tetőfedő mester before its logo arrived. THEME
+       is thematic, not sampled: a clean steel-blue/appliance palette,
+       distinct from both Csergő Szabolcs and Sugár Szerviz's colour
+       choices.
+       Business-branded name, not a personal one, and no solo-operator
+       evidence, so the agent speaks first person plural throughout
+       (megjavítjuk, kimegyünk), same register as Sugár Szerviz.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. clean steel-blue appliance palette, thematic (no logo to sample).
+const THEME = {
+  bg:'#0c1620', dark:'#17263a', mid:'#254058', brand:'#3b9fd8', bright:'#6cbeeb',
+  dot:'#a4dbf7', chatBg:'#f2fafd', tint:'#dbf0fa', tint2:'#e9f6fc', line:'#cde6f3',
+  ink:'#254058', inkSoft:'#3b9fd8', ring:'rgba(59,159,216,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Mosógép és Hűtő szerviz',
+    sub: 'Mosógép, mosogatógép, hűtőgép és szárítógép javítás, márkafüggetlenül',
+    tagline: 'Hajdúszoboszló, a víztoronnyal szemben',
+    initial: 'M',
+    logoSrc: '',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'mosogatógépjavítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '19:47',
+  ownerBenefit: 'Rögzítve és minősítve 19:47-kor, miközben épp egy másik munkán voltatok. Reggel egy induláskész érdeklődőre ébredtek, géptípussal és hibajelenséggel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Jó napot! Szeretne árajánlatot kérni háztartási gép javítására?" },
+  { r:'user',  t:"Igen, a mosogatógépünk szivárog, víz gyűlik a padlón mosogatás közben" },
+  { r:'agent', t:"Értem. Milyen márka, és nagyjából honnan folyik a víz, az ajtó aljánál vagy inkább a gép alól?" },
+  { r:'user',  t:"Bosch, és úgy tűnik az ajtó aljánál szivárog" },
+  { r:'agent', t:"Az leggyakrabban az ajtótömítés elhasználódására utal, idővel berepedezik vagy elveszti a rugalmasságát. Van esetleg lassú lefolyás is, vagy csak a szivárgás a probléma?" },
+  { r:'user',  t:"Most, hogy mondja, tényleg lassabban ereszti le a vizet a végén" },
+  { r:'agent', t:"Az valószínűleg egy elzáródott leeresztő szűrő, gyakran együtt jár a kettő. Kimegyünk, helyszínen megnézzük mindkettőt, és ha kell, az ajtótömítést és a szűrőt is kicseréljük, tisztítjuk. Mikorra kellene?" },
+  { r:'user',  t:"Minél hamarabb, mert most kézzel mosogatunk" },
+  { r:'agent', t:"Ezt értjük, igyekszünk hamar időpontot adni. Melyik városban van?" },
+  { r:'user',  t:"Hajdúszoboszlón" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt a javításra?" },
+  { r:'user',  t:"25 és 35 ezer forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ilyen ajtótömítés- és szűrőproblémánál. Márkafüggetlenül dolgozunk, garanciát adunk a munkára és a beépített alkatrészre is. Elkérhetem a nevét?" },
+  { r:'user',  t:"Szilágyi Kata" },
+  { r:'agent', t:"Köszönöm, Kata. Milyen számon érjük el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0418" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"kata.szilagyi@gmail.com" },
+  { r:'agent', t:"Köszönöm, Kata, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 27_000, mid: 30_000, upper: 33_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Kiszállás és helyszíni diagnosztika',           amt:  8_000 },
+    { label:'Ajtótömítés csere alkatrésszel',                 amt: 10_000 },
+    { label:'Leeresztő szűrő és rendszer tisztítása',         amt:  7_000 },
+    { label:'Próbaüzem és szivárgásteszt',                    amt:  5_000 },
+  ],
+  customer: {
+    'Name':'Kata Szilágyi',
+    'Phone':'+36 20 555 0418',
+    'Email':'kata.szilagyi@gmail.com',
+  },
+  timingShort: '1-2 napon belül',
+  jobTags: ['Bosch mosogatógép, ajtótömítésen szivárgás', 'Lassú leeresztés, elzáródott szűrő gyanújával', 'Helyszíni diagnosztika alkatrész-azonosítással', 'Ajtótömítés és szűrő csere/tisztítás', 'Márkafüggetlen szerviz, garanciával'],
+  budget: { low: 25_000, high: 35_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Hajdúszoboszló', clientZip: '4200',
+  companyCity: 'Hajdúszoboszló', distanceMi: 3,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
