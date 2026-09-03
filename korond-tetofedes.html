@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. KORONDBÁDOG '79 Bt. (brand "Korond Tetőfedés"),
+       Korond (Corund, Hargita megye, Erdély), phone 06 20 282 4044, email
+       info@korond-tetofedes.hu, site korond-tetofedes.hu. No address or
+       base city was listed anywhere on their own site or contact page;
+       confirmed the base city (Korond) directly with the user rather than
+       guessing, same handling as Tetőfedés Szaki. Real detail from their
+       own site: family business "generációk óta" (the '79 in the name
+       implies founded 1979), tile/corrugated/trapéz/zsindely/pala roof
+       coverings, 5 year full workmanship warranty, szakmai
+       felelősségbiztosítás (professional liability insurance), written
+       contract before work starts, structured handover documentation,
+       free site visit with a detailed quote within 24 hours, serves
+       "Magyarország egész területén" from across the Romanian border.
+       Seventh roofing-family demo, so needed real separation again:
+       Keszthelyi Tető (full pitched teardown), Tetőfedés Szaki (flat
+       membrane), Kozák (overlay, no demolition), DECZKY (new timber
+       structure, garden house), Hírös (storm damage), Chikán (custom new
+       hip roof). This one leans on two real things none of the others
+       use: trapézlemez as the covering material (a garage roof, not a
+       house), and the professional-liability-insurance-plus-written-
+       contract angle as the actual trust beat, given to a customer who
+       says a previous contractor burned them with no paperwork. That is
+       a genuinely different sales conversation from a technical one.
+       Client placed in Berettyóújfalu, Hungary, since the company itself
+       is based across the border in Korond, Romania but serves all of
+       Hungary, the first demo in this gallery with that direction of
+       cross-border service (other demos cross into Austria from Hungary,
+       this one crosses into Hungary from Romania).
+       Logo pulled straight from the file the user supplied: a dark
+       charcoal-navy house icon with a vivid orange roof line, "KOROND" in
+       charcoal and "TETŐFEDÉS" in orange, sampled by pixel (orange
+       #ff6106, charcoal-navy #2d2f3b). No other roofing demo in the
+       gallery uses this vivid true-orange on a charcoal-navy base.
+       Family Bt. with generational staff, so the agent speaks first
+       person plural throughout (fedjük, vállaljuk).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. dark charcoal-navy base and vivid orange accent, both from the real logo.
+const THEME = {
+  bg:'#15161d', dark:'#2d2f3b', mid:'#454759', brand:'#ff6106', bright:'#ff8c47',
+  dot:'#ffb37e', chatBg:'#fff8f2', tint:'#ffe3cc', tint2:'#ffeee0', line:'#f5dcc0',
+  ink:'#454759', inkSoft:'#ff6106', ring:'rgba(255,97,6,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Korond Tetőfedés',
+    sub: 'Tetőfedő és bádogos munkák, generációk óta, szakmai felelősségbiztosítással',
+    tagline: 'Korond, munkát vállalunk Magyarország egész területén',
+    initial: 'K',
+    logoSrc: 'korond-tetofedes-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'tetőfelújítás',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '20:52',
+  ownerBenefit: 'Rögzítve és minősítve 20:52-kor, miközben épp egy másik munkán voltatok. Reggel egy induláskész érdeklődőre ébredtek, várossal és részletekkel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Jó napot! Szeretne árajánlatot kérni tetőmunkára?" },
+  { r:'user',  t:"Igen, a garázsunk tetejét kellene újrafedni" },
+  { r:'agent', t:"Rendben, mekkora a garázs alapterülete, és milyen fedést szeretne rá?" },
+  { r:'user',  t:"Kb 45 nm, trapézlemezt szeretnénk, egyszerű és tartós" },
+  { r:'agent', t:"Az egy jó választás garázsra, gazdaságos és sokáig kitart. A jelenlegi fedés és a lécezés milyen állapotban van?" },
+  { r:'user',  t:"A régi hullámpala eléggé elöregedett, azt is le kellene bontani" },
+  { r:'agent', t:"Azt bekalkuláljuk, a bontás után az ácsszerkezetet is átnézzük, hogy szükség van-e javításra a lemezelés előtt." },
+  { r:'user',  t:"Rendben. Őszintén szólva, volt már rossz tapasztalatunk egy másik céggel, papírok, szerződés nélkül dolgoztak, ezért most szeretnénk valami hivatalosabbat." },
+  { r:'agent', t:"Ezt teljesen értjük. Nálunk mindig írásos szerződéssel kezdünk, van szakmai felelősségbiztosításunk, és a munka végén részletes átadás-átvételi dokumentációt kap. Az új fedésre 5 év teljes körű kivitelezői garanciát adunk." },
+  { r:'user',  t:"Ez megnyugtató, akkor mehet" },
+  { r:'agent', t:"Mikorra kellene elkészülnie?" },
+  { r:'user',  t:"2-3 héten belül jó lenne" },
+  { r:'agent', t:"Az belefér, egy ekkora bontás és lemezelés jellemzően 2-3 munkanap. Melyik városban van a garázs?" },
+  { r:'user',  t:"Berettyóújfaluban" },
+  { r:'agent', t:"Nagyjából milyen összeggel számolt az egészre?" },
+  { r:'user',  t:"500 és 650 ezer forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora bontással és trapézlemez fedéssel együtt. Elkérhetem a nevét?" },
+  { r:'user',  t:"Fekete Judit" },
+  { r:'agent', t:"Köszönöm, Judit. Milyen számon érjük el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0429" },
+  { r:'agent', t:"És az email címe?" },
+  { r:'user',  t:"judit.fekete@gmail.com" },
+  { r:'agent', t:"Köszönöm, Judit, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 520_000, mid: 580_000, upper: 650_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Régi hullámpala bontása és elszállítása',      amt:  80_000 },
+    { label:'Ácsszerkezet ellenőrzése és szükséges javítás', amt: 120_000 },
+    { label:'Trapézlemez fedés, kb 45 nm',                    amt: 380_000 },
+  ],
+  customer: {
+    'Name':'Judit Fekete',
+    'Phone':'+36 30 555 0429',
+    'Email':'judit.fekete@gmail.com',
+  },
+  timingShort: '2-3 munkanap',
+  jobTags: ['Garázs, kb 45 nm, elöregedett hullámpala', 'Bontás, ácsszerkezet ellenőrzés és trapézlemez fedés', 'Írásos szerződés a munka megkezdése előtt', 'Szakmai felelősségbiztosítás', '5 év teljes körű kivitelezői garancia'],
+  budget: { low: 500_000, high: 650_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Berettyóújfalu', clientZip: '4100',
+  companyCity: 'Korond', distanceMi: 110,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
