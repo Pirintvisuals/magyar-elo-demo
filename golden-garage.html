@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Golden Garage (Golden.Customs.Cegled), Kosárhegyi
+       út 1., Cegléd 2700, a Bíró car center területén. Phone +36 30 744
+       4923, booking via Reservio, site goldengarage.hu. 100% recommend
+       across 7 Google reviews, multilingual (HU/EN/DE/Chinese), FB own
+       tagline about investing in the car's longevity, value and driving
+       experience, "diszkrécióval, precizitással, kivételes minőséggel".
+       Real detail pulled from their own site: independent detailing
+       studio, founded 2020, philosophy "Nem tömegszolgáltatás. Nem gyors
+       mosás. Precizitás, technológia és szakértelem." and "A Különbség a
+       Részletekben Rejlik", team led by detailer Aranyi Lajos, limited
+       daily capacity for precision work, documented process with
+       photo/protocol per car, personal quality check on every vehicle,
+       7-day satisfaction guarantee, 10% loyalty discount for returning
+       customers. Real published prices used for the quote: korrekciós
+       polírozás "130,000 Ft-tól", kerámia bevonat 20,000-30,000 Ft,
+       ablak kerámia 30,000 Ft, felni polírozás "15,000 Ft-tól".
+       Fourth car-detailing demo in the gallery. Csernyik (Nyíregyháza)
+       already covers correction polish plus Gtechniq ceramic, so this
+       one had to earn its place on more than "another correction job":
+       it leans on Golden Garage's own boutique positioning (limited
+       capacity, photo-documented process, discretion, a named lead
+       detailer) and uses their real four-figure price list for a
+       full premium package (paint correction, paint ceramic, glass
+       ceramic and wheel polish together), a bigger and more complete
+       job than any other detailing demo in the gallery, consistent with
+       their own "not mass service" premium framing.
+       Logo is black background, a gold-and-chrome interlocked "GG"
+       mark with a gold swoosh, "GOLDEN GARAGE" wordmark, sampled by
+       pixel (muted metallic gold #a68957). Matt-Rex already pairs black
+       with a similar soft champagne gold in this gallery, so THEME uses
+       a warmer near-black base plus a brighter, more saturated true-gold
+       accent instead of Matt-Rex's softer antique tone, keeping the two
+       readable as different demos.
+       Team led by a named detailer, not solo, so the agent speaks first
+       person plural throughout (dolgozunk, dokumentáljuk).
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. warm near-black base, saturated true-gold accent, both from the real logo (brightened to stay distinct from Matt-Rex's softer champagne gold).
+const THEME = {
+  bg:'#0d0a05', dark:'#1c1610', mid:'#332616', brand:'#d4a72c', bright:'#e8c65a',
+  dot:'#f5dd8f', chatBg:'#fdfaf0', tint:'#f5e9c6', tint2:'#f9f1dd', line:'#ecdcb0',
+  ink:'#332616', inkSoft:'#d4a72c', ring:'rgba(212,167,44,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Golden Garage',
+    sub: 'Prémium autókozmetika, korrekciós polírozás és kerámia védelem',
+    tagline: 'Cegléd, a Bíró car center területén, 2020 óta',
+    initial: 'G',
+    logoSrc: 'golden-garage-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'autókozmetika',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '16:03',
+  ownerBenefit: 'Rögzítve és minősítve 16:03-kor, miközben épp egy másik autón dolgoztatok. Estére egy induláskész érdeklődő vár, autótípussal és igénnyel együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni autókozmetikára?" },
+  { r:'user',  t:"Igen, most vettem egy használt autót, szeretném rendbe tetetni és megvédeni" },
+  { r:'agent', t:"Gratulálok az új autóhoz. Milyen típus, és mennyire elhasznált a fényezés, vannak rajta karcok, matt foltok?" },
+  { r:'user',  t:"Egy 2019-es Audi A5, van pár finomabb karc és a fényezés kicsit fáradt" },
+  { r:'agent', t:"Ilyenkor egy korrekciós polírozást javaslok, ami réteg alatti karcokat is eltávolít, nem csak eltakarja. Utána kerámia bevonatot szoktunk ajánlani rá, hogy hosszú távon védve legyen. Gondoltál már bevonatra?" },
+  { r:'user',  t:"Igen, hallottam róla, de nem tudom pontosan mit fed le" },
+  { r:'agent', t:"A fényezésre és az üvegfelületekre is fel tudjuk vinni, illetve a felniket is polírozzuk, hogy egységes legyen az összhatás. Minden autónál fotóval dokumentáljuk a folyamatot, és a végén személyesen ellenőrizzük a minőséget. Mikorra szeretnéd?" },
+  { r:'user',  t:"Két héten belül ráérnék" },
+  { r:'agent', t:"Rendben, mivel korlátozott a napi kapacitásunk, előre foglalunk időpontot a Reservio rendszerünkben. Melyik városban vagy?" },
+  { r:'user',  t:"Abonyban" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál a teljes csomagra?" },
+  { r:'user',  t:"180 és 230 ezer forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora korrekciós polírozásra a kerámia bevonattal, az ablakkerámiával és a felnipolírozással együtt. 7 napos elégedettségi garanciát adunk rá. Elkérhetem a neved?" },
+  { r:'user',  t:"Nagy Dorina" },
+  { r:'agent', t:"Köszönöm, Dorina. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0467" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"dorina.nagy@gmail.com" },
+  { r:'agent', t:"Köszönöm, Dorina, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 190_000, mid: 205_000, upper: 225_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Korrekciós polírozás, teljes fényezés',   amt: 130_000 },
+    { label:'Kerámia bevonat a fényezésre',             amt:  30_000 },
+    { label:'Ablak kerámia bevonat',                    amt:  30_000 },
+    { label:'Felnipolírozás',                            amt:  15_000 },
+  ],
+  customer: {
+    'Name':'Dorina Nagy',
+    'Phone':'+36 30 555 0467',
+    'Email':'dorina.nagy@gmail.com',
+  },
+  timingShort: 'Előre egyeztetett időpont',
+  jobTags: ['2019-es Audi A5, frissen vásárolt használt autó', 'Korrekciós polírozás, réteg alatti karcokra is', 'Kerámia bevonat fényezésre és üvegfelületekre', 'Felnipolírozás', 'Fotóval dokumentált folyamat, 7 napos elégedettségi garancia'],
+  budget: { low: 180_000, high: 230_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Abony', clientZip: '2740',
+  companyCity: 'Cegléd', distanceMi: 12,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
