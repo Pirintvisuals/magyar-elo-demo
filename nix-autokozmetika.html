@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. NIX Autókozmetika, Pesti út 232., Budapest 1173
+       (17. kerület). Phone +36 70 804 1667, email
+       info@nixautokozmetika.hu, site nixautokozmetika.hu. Real detail
+       pulled straight from their own site, including actual published
+       prices, not invented ones: Bronze/Silver/Platinum/Platinum+ wash
+       packages (11,990-48,990 Ft depending on size), teljes körű külső
+       kozmetika 49,990-69,990 Ft, kárpittisztítás 19,990-59,990 Ft,
+       bőrápolás 9,990-34,990 Ft, kemény wax bevonat (6 hónap) fixed at
+       19,990 Ft, fényszóró polírozás nanobevonattal fixed at 9,990
+       Ft/lámpa, szélvédőjavítás "9,990 Ft-tól". Own tagline "Szerezz bele
+       újra az autódba!", 394 Google review "KIVÁLÓ" rating, kényelmes
+       váró frissítőkkel, időpontfoglalásos rendszer, nyitva H-P 8-18,
+       Szo 8-15.
+       Second car-detailing demo in the gallery (after Csernyik
+       Autókozmetika, Nyíregyháza, which leads with correction polírozás
+       and Gtechniq ceramic coating). This one is deliberately different:
+       it uses NIX's own REAL fixed-price add-ons (kemény wax 19,990 Ft,
+       fényszóró polírozás 9,990 Ft/lámpa) plus a mid-band real exterior
+       package price, rather than an invented total, since these are
+       actual published numbers rather than estimates. Scenario is a
+       routine seasonal refresh (wax protection before winter, headlight
+       clarity), not a correction/ceramic job like Csernyik's, so the two
+       demos read as genuinely different services, not a reskin.
+       Logo pulled straight from their own site/FB: white background,
+       charcoal "Auto" plus a sky-blue "NIX" wordmark with a car-swoosh
+       cutting through the X, "Autókozmetika" in charcoal beneath, sampled
+       by pixel (blue #3ba5df, charcoal-black #1a1a1a). Fintor already
+       pairs black with a similar blue in this gallery, so THEME uses a
+       neutral true-grey base instead of Fintor's blue-tinted near-black,
+       keeping the real blue as the accent without reading as the same
+       palette.
+       Established business with 394 reviews and an appointment system
+       (not a solo operator), so the agent speaks first person plural
+       throughout (vállaljuk, foglalunk), same register as Csernyik.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. neutral grey base, sky-blue accent both from the real site logo.
+const THEME = {
+  bg:'#121212', dark:'#242424', mid:'#3d3d3d', brand:'#3ba5df', bright:'#65c2ee',
+  dot:'#a3ddf5', chatBg:'#f2faff', tint:'#dcf0fc', tint2:'#eaf6fd', line:'#cde5f3',
+  ink:'#3d3d3d', inkSoft:'#3ba5df', ring:'rgba(59,165,223,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'NIX Autókozmetika',
+    sub: 'Külső-belső autókozmetika, 394 értékelés, KIVÁLÓ minősítéssel',
+    tagline: 'Budapest XVII. kerület, szerezz bele újra az autódba',
+    initial: 'N',
+    logoSrc: 'nix-autokozmetika-logo.jpg',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'autókozmetika',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '17:38',
+  ownerBenefit: 'Rögzítve és minősítve 17:38-kor, miközben épp egy másik autón dolgoztatok. Reggel egy induláskész érdeklődőre ébredtek, csomagválasztással együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni autókozmetikára?" },
+  { r:'user',  t:"Igen, tél előtt szeretném rendbe tetetni az autót" },
+  { r:'agent', t:"Jó időzítés, ilyenkor a legtöbben erre gondolnak. Milyen autód van, és nagyjából mekkora?" },
+  { r:'user',  t:"Egy középkategóriás VW Golf" },
+  { r:'agent', t:"Köszi. Mit szeretnél, csak egy alapos külső-belső mosást, vagy valami extrát is, wax védelmet, fényszóró polírozást?" },
+  { r:'user',  t:"Wax védelmet mindenképp szeretnék, és a fényszórók is kicsit fátyolosak" },
+  { r:'agent', t:"Akkor egy teljes körű külső autókozmetikát javaslok, rá kemény wax bevonattal, ami kb fél évig védi a fényezést, plusz fényszóró polírozás nanobevonattal, ami újra tisztává teszi a lámpákat. Mikorra szeretnéd?" },
+  { r:'user',  t:"A jövő héten ráérnék" },
+  { r:'agent', t:"Az simán belefér, időpontfoglalásos rendszerrel dolgozunk, amíg vársz, a váróban frissítő is van. Egy ekkora csomag jellemzően 3-4 óra. Melyik kerületben vagy?" },
+  { r:'user',  t:"A XVI. kerületben" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál?" },
+  { r:'user',  t:"90 és 115 ezer forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy középkategóriás autóra a teljes körű kozmetikával, wax bevonattal és a fényszóró polírozással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Simon Petra" },
+  { r:'agent', t:"Köszönöm, Petra. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 30 555 0441" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"petra.simon@gmail.com" },
+  { r:'agent', t:"Köszönöm, Petra, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 92_000, mid: 99_960, upper: 110_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Teljes körű külső autókozmetika (közepes autó)', amt: 59_990 },
+    { label:'Kemény wax bevonat, kb 6 hónapos védelem',        amt: 19_990 },
+    { label:'Fényszóró polírozás nanobevonattal (2 db)',       amt: 19_980 },
+  ],
+  customer: {
+    'Name':'Petra Simon',
+    'Phone':'+36 30 555 0441',
+    'Email':'petra.simon@gmail.com',
+  },
+  timingShort: '3-4 óra',
+  jobTags: ['Középkategóriás VW Golf', 'Teljes körű külső autókozmetika', 'Kemény wax bevonat, kb 6 hónapos védelem', 'Fényszóró polírozás nanobevonattal', 'Időpontfoglalásos rendszer, kényelmes váró'],
+  budget: { low: 90_000, high: 115_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Budapest XVI. kerület', clientZip: '1163',
+  companyCity: 'Budapest XVII. kerület', distanceMi: 6,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
