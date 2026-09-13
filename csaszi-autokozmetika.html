@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Quote Demo</title>
+  <!-- Client sample. Csaszi Autókozmetika, Gyulai út 81., Békéscsaba
+       5600. Phone +36 70 677 2199, email csasziautokozmetika@gmail.com,
+       FB facebook.com/CsasziAutokozmetika (1.5K followers), no site yet
+       (own reply confirmed it's "fejlesztés alatt", under development).
+       Kept to what's actually verifiable: name, address, phone, email,
+       follower count, no site. Didn't borrow NIX Autókozmetika's real
+       published prices for this one since those numbers belong to a
+       different, unrelated business; Csaszi's own pricing isn't public
+       anywhere, so the quote here is a plausible estimate like most
+       demos in the gallery, not a real published price.
+       Third car-detailing demo in the gallery, so needed a genuinely
+       different job shape after Csernyik Autókozmetika (correction
+       polírozás, Gtechniq ceramic coating) and NIX Autókozmetika (real
+       fixed-price wax + headlight refresh). This one leads with INTERIOR
+       restoration rather than exterior paint work: a car going up for
+       sale with a lingering odour (dohányfüst) and stained upholstery,
+       needing kárpittisztítás plus ózonos szagtalanítás, a service
+       neither of the other two demos touches at all.
+       Logo is a monochrome dark teal-navy square with a white stylised
+       car-silhouette "C" and "SASZI AUTÓKOZMETIKA" wordmark, sampled by
+       pixel (bg #021a26, everything else white). No colour to sample
+       beyond the base itself, so THEME keeps that real dark teal-navy as
+       the base and picks an ice-blue accent rather than a teal-green one,
+       since two other demos (V&V Gekisz, Lakásfelújítók) already own a
+       green-leaning teal-on-black palette.
+       No solo-operator evidence and a business-branded (if nickname-
+       style) name, so the agent speaks first person plural throughout
+       (vállaljuk, megcsináljuk), same register as Csernyik and NIX.
+       Dialogue written short, without em dashes, per Milan's standing
+       preference.
+       Data-only file. the engine and styles live in /quote-agent.js and /quote-agent.css. -->
+  <link rel="stylesheet" href="/quote-agent.css">
+</head>
+<body>
+<div class="page-center" id="hero"></div>
+<div id="widget-root"></div>
+
+<script>
+// 1. THEME. real dark teal-navy base from the logo, ice-blue accent (not teal-green, already taken).
+const THEME = {
+  bg:'#021a26', dark:'#0a2b3a', mid:'#154759', brand:'#3fa9dc', bright:'#6ec6ea',
+  dot:'#a8ddf3', chatBg:'#f2f9fd', tint:'#dcedf8', tint2:'#eaf4fb', line:'#cee1ee',
+  ink:'#154759', inkSoft:'#3fa9dc', ring:'rgba(63,169,220,0.40)', cta:'#f59e0b', cta2:'#d97706',
+}
+
+// 2. CONFIG. company identity (Calendly link is fixed for every sample)
+const CONFIG = {
+  brand: {
+    name: 'Csaszi Autókozmetika',
+    sub: 'Külső-belső autókozmetika és kárpittisztítás',
+    tagline: 'Békéscsaba, 1500+ követő a Facebookon',
+    initial: 'C',
+    logoSrc: 'csaszi-autokozmetika-logo.png',
+    fbHandle: '',
+    online: 'Online · Másodperceken belül válaszolunk',
+  },
+  niche: 'autókozmetika',
+  tooltip: 'Nézd meg, hogyan működik ▶',
+  currency: { symbol: ' Ft', locale: 'hu-HU', position: 'suffix' },
+  sendToOwnerLabel: 'Küldés a tulajdonosnak →',
+  calendly: 'https://calendly.com/pirint-milan/quoting-agent-sample',
+  ctaTitle: 'Ez csak egy minta.',
+  ctaText: 'Szeretnéd ezt a saját weboldaladon, hogy éjjel-nappal így gyűjtsön valódi érdeklődőket?',
+  ctaButton: 'Foglalj egy 15 perces hívást →',
+  leadTime: '14:29',
+  ownerBenefit: 'Rögzítve és minősítve 14:29-kor, miközben épp egy másik autón dolgoztatok. Estére egy induláskész érdeklődő vár, igénnyel és időponttal együtt.',
+  labels: {
+    titleSuffix: 'Azonnali árajánlat (minta)',
+    sampleBadge: 'Minta · nem élő rendszer',
+    watchHintPre: 'Koppints a chat buborékra, magától lejátszódik, ',
+    watchHintBold: 'csak nézd',
+    watchHintPost: ' ↘',
+    replayTitle: 'Újrajátszás',
+    closeTitle: 'Bezárás',
+    sampleStrip: 'Minta beszélgetés, automatikusan lejátszva',
+    inputPlaceholder: 'Minta, nem kell gépelni',
+    estimateIntro: 'Itt a becslésed',
+    estimateIntroSuffix: 'Így néznek ki a számok:',
+    estimatedTotal: 'Becsült összesen',
+    rangeSuffix: 'tartomány',
+    timing: 'Átfutási idő',
+    estimatedQuote: 'Becsült árajánlat',
+    ownerNotifSample: 'Tulajdonosi értesítés · minta',
+    howReceives: 'Így értesül róla {name}',
+    newLeadPrefix: 'Új',
+    budgetMatchText: 'Költségkeret egyezik, az árajánlat az ügyfél keretén belül van',
+    budgetAboveText: 'Kicsit a megadott keret felett',
+    leadLocation: 'Érdeklődő helye',
+    fromYou: 'Tőletek',
+    distanceUnit: 'km',
+    fromCity: 'innen: {city}',
+    calculatedQuote: 'Kiszámított árajánlat',
+    theirBudget: 'Az ő kerete',
+    jobDetails: 'Munka részletei',
+    leadScore: 'Érdeklődő pontszáma',
+    confirmationEmail: 'Az ügyfél automatikus visszaigazoló emailt kapott',
+    bookCallFallback: 'Foglalj egy hívást →',
+    logoAlt: '{name} logó',
+  },
+}
+
+// 3. MSGS. the conversation (plays itself, always the same single route)
+const MSGS = [
+  { r:'agent', t:"Szia! Szeretnél árajánlatot kérni autókozmetikára?" },
+  { r:'user',  t:"Igen, eladásra készítem elő az autót, de a belseje elég elhanyagolt" },
+  { r:'agent', t:"Értem, ez sokat számít eladásnál. Mi a legnagyobb gond, foltok, szag, vagy mindkettő?" },
+  { r:'user',  t:"Mindkettő, dohányfüst szaga van, és az üléseken is vannak foltok" },
+  { r:'agent', t:"Az elég gyakori kombináció. Kárpittisztítást javaslok az üléseken és a szőnyegen, plusz ózonos szagtalanítást, ami a szövetbe és a szellőzőrendszerbe beivódott szagot is kezeli, nem csak elfedi. Milyen autód van?" },
+  { r:'user',  t:"Egy 2015-ös Opel Astra" },
+  { r:'agent', t:"Köszi. A műszerfalat és a belső plasztik felületeket is átnézzük, hogy egységes legyen az összhatás. Mikorra kellene?" },
+  { r:'user',  t:"A hétvégére, mert jövő héten szeretném meghirdetni" },
+  { r:'agent', t:"Az belefér, egy ekkora munka jellemzően fél nap. Melyik városban vagy?" },
+  { r:'user',  t:"Békésen" },
+  { r:'agent', t:"Nagyjából milyen összeggel számoltál?" },
+  { r:'user',  t:"50 és 70 ezer forint közé saccoltam" },
+  { r:'agent', t:"Ez reális egy ekkora kárpittisztításra az ózonos szagtalanítással és a plasztikápolással együtt. Elkérhetem a neved?" },
+  { r:'user',  t:"Oláh Réka" },
+  { r:'agent', t:"Köszönöm, Réka. Milyen számon érünk el a legkönnyebben?" },
+  { r:'user',  t:"+36 20 555 0453" },
+  { r:'agent', t:"És az email címed?" },
+  { r:'user',  t:"reka.olah@gmail.com" },
+  { r:'agent', t:"Köszönöm, Réka, már állítjuk is össze a tájékoztató árat." },
+  { r:'estimate' }
+]
+
+// 4. EST. itemised quote and lead card (items must sum to EST.mid)
+const EST = {
+  lower: 55_000, mid: 60_000, upper: 68_000,
+  status: 'PRIORITY',
+  items: [
+    { label:'Kárpittisztítás, ülések és szőnyeg',              amt: 35_000 },
+    { label:'Ózonos szagtalanítás',                             amt: 15_000 },
+    { label:'Műszerfal és belső plasztik felületek ápolása',   amt: 10_000 },
+  ],
+  customer: {
+    'Name':'Réka Oláh',
+    'Phone':'+36 20 555 0453',
+    'Email':'reka.olah@gmail.com',
+  },
+  timingShort: 'Fél nap',
+  jobTags: ['2015-ös Opel Astra, eladás előtt', 'Dohányfüst szag és foltos ülések', 'Kárpittisztítás, ülések és szőnyeg', 'Ózonos szagtalanítás', 'Belső plasztik felületek ápolása'],
+  budget: { low: 50_000, high: 70_000 },
+  score: 95, scoreLabel: 'Prémium érdeklődő',
+  clientCity: 'Békés', clientZip: '5630',
+  companyCity: 'Békéscsaba', distanceMi: 12,
+}
+</script>
+<script src="/quote-agent.js"></script>
+</body>
+</html>
